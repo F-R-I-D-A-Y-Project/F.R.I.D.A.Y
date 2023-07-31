@@ -13,10 +13,10 @@ Projeto desenvolvido na disciplina de Laboratório de Programação 2 do Institu
 - Johannes Elias Joseph Salomão
   
 
-## Linguagens implementadas
+## Linguagens compatíveis
 
-- Java
-- Python
+- Java (20)
+- Python (3.10)
 
 ### Bibliotecas usadas
 
