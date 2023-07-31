@@ -30,4 +30,4 @@ Projeto desenvolvido na disciplina de Laboratório de Programação 2 do Institu
 
 ## Documentação
 
-The documentation can be found [at the website](https://github.com/varad-comrad)
+The documentation can be found [at the website](https://github.com/varad-comrad/Lab-Prog-2/wiki)
