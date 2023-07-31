@@ -1,33 +1,33 @@
-# Lab-Prog-2
+# Lab Prog 2
 
 Projeto desenvolvido na disciplina de Laboratório de Programação 2 do Instituto Militar de Engenharia.
 
-## Tema
+## Theme
 
-### Subtema
+### Subtheme
 
-## Integrantes
+## Team members
 
 - Fabricio Asfora Romero Assunção
 - Roberto Suriel de Melo Rebouças
 - Johannes Elias Joseph Salomão
   
 
-## Linguagens compatíveis
+## Languages
 
 - Java (20)
 - Python (3.10)
 
-### Bibliotecas usadas
+### Frameworks used
 
 - Java
   - ...
 - Python
   - ...
  
-## Uso
+## How to use
 ...
 
-## Documentação
+## Documentation
 
 The documentation can be found [at the website](https://github.com/varad-comrad/Lab-Prog-2/wiki)
