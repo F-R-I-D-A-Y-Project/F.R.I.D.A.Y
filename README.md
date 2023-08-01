@@ -1,9 +1,11 @@
 # F.R.I.D.A.Y
 
 
-Project developed for the discipline "Laboratório de Programação 2", at "Instituto Militar de Engenharia"
+Java project developed for the discipline "Laboratório de Programação 2", at "Instituto Militar de Engenharia"
 
 ## About 
+
+F.R.I.D.A.Y is a personal assistant AI developed in Java...
 
 Architecture used: Transformers
 ...
@@ -13,22 +15,20 @@ Architecture used: Transformers
 - Fabricio Asfora Romero Assunção
 - Roberto Suriel de Melo Rebouças
 - Johannes Elias Joseph Salomão
-  
-## Languages
 
-- Java (20)
-- Python (3.10)
+## Compatibility
+
+As of now, F.R.I.D.A.Y is compatible with Java (20-23)
 
 ### Frameworks used
 
-- Java
-  - ...
-- Python
-  - ...
- 
+- Hugging Face's Java Transformers
+- DL4J
+- ...
+
 ## How to use
 ...
 
 ## Documentation
 
-The documentation can be found [at the website](https://github.com/varad-comrad/Lab-Prog-2/wiki)
+The documentation can be found [here](https://github.com/F-R-I-D-A-Y-Project/F.R.I.D.A.Y/tree/main/docs)
