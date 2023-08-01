@@ -1,10 +1,11 @@
-# Lab Prog 2
+# F.R.I.D.A.Y
 
-Projeto desenvolvido na disciplina de Laboratório de Programação 2 do Instituto Militar de Engenharia.
 
-## Theme
+Project developed for the discipline "Laboratório de Programação 2", at "Instituto Militar de Engenharia"
 
-### Subtheme
+## About 
+
+...
 
 ## Team members
 
@@ -12,7 +13,6 @@ Projeto desenvolvido na disciplina de Laboratório de Programação 2 do Institu
 - Roberto Suriel de Melo Rebouças
 - Johannes Elias Joseph Salomão
   
-
 ## Languages
 
 - Java (20)
