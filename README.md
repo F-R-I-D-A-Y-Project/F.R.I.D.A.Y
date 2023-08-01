@@ -5,6 +5,7 @@ Project developed for the discipline "Laboratório de Programação 2", at "Inst
 
 ## About 
 
+Architecture used: Transformers
 ...
 
 ## Team members
