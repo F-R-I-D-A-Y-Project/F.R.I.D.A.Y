@@ -24,7 +24,7 @@ As of now, F.R.I.D.A.Y is compatible with Java (20-23)
 
 - OpenNLP
 - DL4J
-- ...
+- Weka
 
 ## How to use
 ...
