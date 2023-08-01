@@ -22,7 +22,7 @@ As of now, F.R.I.D.A.Y is compatible with Java (20-23)
 
 ### Frameworks used
 
-- Hugging Face's Java Transformers
+- OpenNLP
 - DL4J
 - ...
 
