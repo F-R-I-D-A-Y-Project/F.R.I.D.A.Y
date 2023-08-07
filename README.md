@@ -1,11 +1,11 @@
 # F.R.I.D.A.Y
 
 
-Java project developed for the discipline "Laboratório de Programação 2", at "Instituto Militar de Engenharia"
+Python project developed for the discipline "Laboratório de Programação 2", at "Instituto Militar de Engenharia"
 
 ## About 
 
-F.R.I.D.A.Y is a personal assistant AI developed in Java...
+F.R.I.D.A.Y is a personal assistant AI developed in Python...
 
 Architecture used: Transformers
 ...
@@ -22,9 +22,9 @@ As of now, F.R.I.D.A.Y is compatible with Java (20-23)
 
 ### Frameworks used
 
-- OpenNLP
-- DL4J
-- Weka
+- Pytorch
+- Hugging Face
+- Keras
 
 ## How to use
 ...
