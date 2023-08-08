@@ -1,9 +1,8 @@
 import argparse, subprocess, pathlib, os
 
 def parse_args() -> argparse.Namespace:
-    options = 'run', 'debug',
     parser = argparse.ArgumentParser()
-    parser.add_argument('args', choices=options)
+    parser.add_argument('args', nargs='+')
     return parser.parse_args()
 
 def main():
