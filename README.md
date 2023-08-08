@@ -27,7 +27,20 @@ As of now, F.R.I.D.A.Y is compatible with Python 3.10+
 - Keras
 
 ## How to use
-...
+To create and activate the Python virtual environment, use:
+
+- On Linux:
+
+``` sh
+. init_venv.sh
+activate
+```
+
+- On Windows:
+``` ps1
+. init_venv.ps1
+InitVenv
+```
 
 ## Documentation
 
