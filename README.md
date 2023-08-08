@@ -42,6 +42,17 @@ activate_venv
 InitVenv
 ```
 
+Then, all you have to do is run either
+``` sh
+python src/main/main/main.py
+```
+on your terminal or simply use:
+
+``` sh
+friday run
+```
+
+
 ## Documentation
 
 The documentation can be found [here](https://github.com/F-R-I-D-A-Y-Project/F.R.I.D.A.Y/tree/main/docs)
