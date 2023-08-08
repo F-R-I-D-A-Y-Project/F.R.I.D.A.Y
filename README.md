@@ -18,12 +18,12 @@ Architecture used: Transformers
 
 ## Compatibility
 
-As of now, F.R.I.D.A.Y is compatible with Java (20-23)
+As of now, F.R.I.D.A.Y is compatible with Python 3.10+
 
 ### Frameworks used
 
 - Pytorch
-- Hugging Face
+- Hugging Face Transformers
 - Keras
 
 ## How to use
