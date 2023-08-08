@@ -9,3 +9,7 @@ function InitVenv {
     # Install requirements using pip
     pip install -r requirements.txt
 }
+
+function friday {
+
+}
