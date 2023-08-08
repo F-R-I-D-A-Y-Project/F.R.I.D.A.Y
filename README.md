@@ -33,7 +33,7 @@ To create and activate the Python virtual environment, use:
 
 ``` sh
 . init_venv.sh
-activate
+activate_venv
 ```
 
 - On Windows:
