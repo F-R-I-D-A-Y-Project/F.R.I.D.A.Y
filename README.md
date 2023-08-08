@@ -44,15 +44,15 @@ InitVenv
 
 Then, all you have to do is run either
 ``` sh
-python src/main/main/main.py
+python runner.py run
 ```
 on your terminal or simply use:
 
 ``` sh
 friday run
 ```
-
+after placing ``` source init_venv.sh``` in your PATH
 
 ## Documentation
 
-The documentation can be found [here](https://github.com/F-R-I-D-A-Y-Project/F.R.I.D.A.Y/tree/main/docs)
+The documentation can be found [here](https://github.com/F-R-I-D-A-Y-Project/F.R.I.D.A.Y-Python/docs)
