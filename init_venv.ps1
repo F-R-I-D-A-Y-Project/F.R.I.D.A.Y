@@ -11,5 +11,5 @@ function InitVenv {
 }
 
 function friday {
-
+    python aux.py $($args -join ' ')
 }

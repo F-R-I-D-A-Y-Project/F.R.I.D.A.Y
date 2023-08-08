@@ -5,5 +5,5 @@ function activate_venv(){
 }
 
 function friday(){
-
+    python runner.py $@
 }
