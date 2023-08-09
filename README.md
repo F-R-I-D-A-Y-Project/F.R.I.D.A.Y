@@ -38,7 +38,7 @@ activate_venv
 
 - On Windows:
 ``` ps1
-. init_venv.ps1
+. .\init_venv.ps1
 InitVenv
 ```
 
@@ -51,7 +51,7 @@ on your terminal or simply use:
 ``` sh
 friday run
 ```
-after placing ``` source init_venv.sh``` in your PATH
+after placing ``` source init_venv.sh``` (or ``` . .\init_venv.ps1```) in your PATH
 
 ## Documentation
 

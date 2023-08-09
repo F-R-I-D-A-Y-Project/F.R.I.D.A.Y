@@ -1,0 +1,2 @@
+class MCS:
+    pass
