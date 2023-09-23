@@ -22,8 +22,8 @@ As of now, F.R.I.D.A.Y is compatible with Python 3.10+
 
 ### Frameworks used
 
-- Pytorch
-- Hugging Face Transformers
+- Numpy
+- Tensorflow
 - Keras
 
 ## How to use
