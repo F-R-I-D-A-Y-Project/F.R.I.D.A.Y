@@ -4,6 +4,5 @@ from ..shell.mcs import MCS
 
 def main():
     model = Model()
-    mcs = MCS()
-    hmi = HMI(model, mcs)
+    hmi = HMI(model)
     hmi.run()
