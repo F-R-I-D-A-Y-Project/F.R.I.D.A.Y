@@ -1,5 +1,5 @@
 import subprocess, os, sys, pexpect, platform
-class MCS:
+class MSC:
     '''
         This class is responsible for the communication between the chatbot and the shell
     '''
@@ -24,7 +24,7 @@ class MCS:
         self.child_process = pexpect.spawn(self.init_cmd)
         if self.command != None:
             self.child_process.sendline(self.command)
-        return self.child_process
+        return self
     
     def __exit__(self, exc_type, exc_value, traceback):
         self.child_process.close()
@@ -32,8 +32,8 @@ class MCS:
     pass
 
 def main():
-    with MCS(command="echo 'Hello, World!'") as mcs:
-        mcs.send("")
+    with MSC() as mcs:
+        pass
 
 if __name__ == "__main__":
     main()

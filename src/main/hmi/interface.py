@@ -1,5 +1,6 @@
-import tkinter
-from ..shell import MCS
+import tkinter as tk
+from ..shell.msc import MSC
+from ..model.model import Model
 
 class HMI:
     '''
@@ -7,14 +8,48 @@ class HMI:
     '''
     def __init__(self, model) -> None:
         self.__model = model
-        pass
+        self.__gui = tk.Frame()
+        self.__button = tk.Button()
+        self.__text_area = ...
+        self.__text_box = ...
 
     @property
     def model(self):
-        return self.__model
+        return self.__model    
+
+    @property
+    def gui(self):
+        '''
+        
+        '''
+        return self.__gui
     
-    def run(self) -> None:
+    @property
+    def send_button(self) -> None:
+        '''
+
+        '''
         pass
+
+    @property
+    def text_area(self):
+        '''
+
+        '''
+        pass
+
+    @property
+    def text_box(self):
+        '''
+        
+        '''
+        pass
+
+    def run(self) -> None:
+        '''
+        
+        '''
+        self.gui.mainloop()
 
     def answer_to(self, message: str) -> str:
         '''
