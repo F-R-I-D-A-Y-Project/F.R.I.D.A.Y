@@ -65,7 +65,7 @@ class HMI:
         bottom_label.place(relwidth=1, rely=0.825)
 
         # message entry box
-        self.text_box = tk.Text(bottom_label, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT)
+        self.text_box = tk.Entry(bottom_label, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT)
         self.text_box.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
         self.text_box.focus()
         self.text_box.bind("<Return>", self.send)
@@ -75,12 +75,6 @@ class HMI:
                                   command=self.send)
         self.__button.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
         
-        # message entry box
-        self.entry = tk.Entry(bottom_label, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT)
-        self.entry.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
-        self.entry.focus()
-        self.entry.bind("<Return>", self.send)
-
     def run(self) -> None:
         '''
             This method runs the GUI.
@@ -91,13 +85,14 @@ class HMI:
         '''
             This method sends a message to the chatbot.
         '''
-        message = self.entry.get()
+        message = self.text_box.get()
         if not message:
             return
-        self.text_box.configure(state=tk.NORMAL)
+        self.text_box.delete(0, tk.END)
+        self.text_area.configure(state=tk.NORMAL)
         self.text_area.insert(tk.END, "You: " + message + '\n\n')
         self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.answer_to(message) + '\n\n')
-        pass
+        self.text_area.configure(state=tk.DISABLED)
 
     def answer_to(self, message: str) -> str:
         '''
