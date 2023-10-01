@@ -7,13 +7,10 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     args = parse_args()
-    if args.args == 'run':
+    if args.args[0] == 'run':
         print('run')
-        # path = pathlib.Path('.') / 'src' / 'main' / 'main' / 'main.py'
-        # subprocess.run(f'python {path.absolute()}', shell=True)
-    
-    if args.args == 'debug':
-        print('debug')
+        path = pathlib.Path('.') / 'src' / 'main' / 'main' / 'main.py'
+        subprocess.run(f'python {path.absolute()}', shell=True)
 
 if __name__ == '__main__':
     main()
