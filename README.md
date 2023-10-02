@@ -23,8 +23,9 @@ As of now, F.R.I.D.A.Y is compatible with Python 3.10+
 ### Frameworks used
 
 - Numpy
-- Tensorflow
-- Keras
+- Pytorch
+- Pandas
+- ...
 
 ## How to use
 To create and activate the Python virtual environment, use:
