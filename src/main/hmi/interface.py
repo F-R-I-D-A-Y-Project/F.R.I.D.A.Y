@@ -37,7 +37,7 @@ class HMI:
             This method initializes the GUI.
         '''
         self.gui.title("Chat")
-        self.gui.resizable(width=False, height=False)
+        self.gui.resizable(width=True, height=True)
         self.gui.configure(width=470, height=550, bg=BG_COLOR)
 
         # head label
