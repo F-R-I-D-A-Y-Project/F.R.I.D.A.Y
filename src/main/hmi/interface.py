@@ -1,4 +1,5 @@
 import sys, pathlib
+from typing import Self
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 import tkinter as tk
@@ -21,23 +22,24 @@ class HMI:
     '''
         This class is the GUI of the chatbot.
     '''
-    def __init__(self, model) -> None:
+    def __init__(self: Self, model) -> None:
         self.__model = model
+        self.__answer = ''
         self.__gui = tk.Tk()
         self.initialize()
 
     @property
-    def model(self):
+    def model(self: Self):
         return self.__model    
 
     @property
-    def gui(self):
+    def gui(self: Self):
         '''
         
         '''
         return self.__gui
     
-    def initialize(self):
+    def initialize(self: Self):
         '''
             This method initializes the GUI.
         '''
@@ -91,7 +93,7 @@ class HMI:
         '''
         self.gui.mainloop()
 
-    def send(self, event=None) -> None:
+    def send(self: Self, event=None) -> None:
         '''
             This method sends a message to the chatbot.
         '''
@@ -101,10 +103,23 @@ class HMI:
         self.text_box.delete(0, tk.END)
         self.text_area.configure(state=tk.NORMAL)
         self.text_area.insert(tk.END, "You: " + message + '\n\n')
-        self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.answer_to(message) + '\n\n')
+        while answer:=self.answer_to(message) == self.__answer:
+            continue
+        self.__answer = self.answer_to(message)
+        self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
+        # if '@shell' in answer:
+        #    answer.split('@shell ')[1].split('/@shell')[0]
+        #    ...
+        # elif '@psh' in answer:
+        #    answer.split('@psh ')[1].split('/@psh')[0]
+        #    ...
+        # elif '@code' in answer:
+        #    answer.split('@code ')[1].split('/@code')[0]
+        #    ...
+
         self.text_area.configure(state=tk.DISABLED)
 
-    def answer_to(self, message: str) -> str:
+    def answer_to(self: Self, message: str) -> str:
         '''
             This method returns the answer of the chatbot to a message.
         '''

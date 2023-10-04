@@ -8,7 +8,9 @@ import numpy as np
 import seaborn as sns
 import torchtext
 import matplotlib.pyplot as plt
-import csv, json
+import csv, json, pickle
+import pathlib
+import subprocess
 from typing import Self
 warnings.simplefilter("ignore")
 
@@ -386,14 +388,16 @@ class Model:
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
             creates the Transformers Model and trains it
+
+            If the dataset was unchanged, it loads the model from the pickle file. If not, the training algorithm will be executed.
         '''
         # self.__model = Transformer(...)
         # self.__tokenizer = Tokenizer(...)
-        with open(self.__dataset, 'r') as f:
-            data = csv.reader(f)
-        
-
-        pass
+        if (pathlib.Path('.') / 'model.pkl').exists():
+            with open('model.pkl', 'rb') as f:
+                self.__model = pickle.load(f)
+        else:
+            self.__train()
 
     def predict(self: Self, message: str) -> str:
         '''
@@ -401,4 +405,25 @@ class Model:
             It receives a message, tokenizes it, and passes it to the Transformers Model
         '''
 
-        pass
+    def __serialize_model(self: Self) -> None:
+        '''
+            Serializes the model into a pickle file to avoid retraining it every time the chatbot is executed.
+        '''
+
+    def __train(self: Self) -> None:
+        '''
+            Training algorithm of the Tranformers model
+        '''
+        with open(self.__dataset, 'r') as f:
+            data = csv.reader(f)
+
+    def check_db_change(self: Self) -> None:
+        '''
+            Verifies changes in the dataset. If there are changes, it will delete the serialized model.
+        '''
+        out = subprocess.run(f'git diff {self.__dataset}', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute(),
+                       capture_output=True).stdout.strip()
+        if out:
+            subprocess.run(f'rm model.pkl', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+            subprocess.run([f'git add {self.__dataset}', 'git commit -m "Update dataset"'], shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+            
