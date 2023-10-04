@@ -3,8 +3,11 @@ function activate_venv(){
     python -m venv env
     source env/bin/activate
     pip install -r requirements.txt
+    deactivate
 }
 
 function friday(){
+    source env/bin/activate
     python runner.py $@
+    deactivate
 }

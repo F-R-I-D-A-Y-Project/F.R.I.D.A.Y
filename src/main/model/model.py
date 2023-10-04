@@ -8,11 +8,13 @@ import numpy as np
 import seaborn as sns
 import torchtext
 import matplotlib.pyplot as plt
+import csv, json
+from typing import Self
 warnings.simplefilter("ignore")
 
 
 class Embedding(nn.Module):
-    def __init__(self, vocab_size, embed_dim):
+    def __init__(self: Self, vocab_size, embed_dim):
         '''
         Args:
             vocab_size: size of vocabulary
@@ -20,7 +22,7 @@ class Embedding(nn.Module):
         '''
         super(Embedding, self).__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
-    def forward(self, x):
+    def forward(self: Self, x):
         '''
         Args:
             x: input vector
@@ -32,7 +34,7 @@ class Embedding(nn.Module):
 
 
 class PositionalEmbedding(nn.Module):
-    def __init__(self,max_seq_len,embed_model_dim):
+    def __init__(self: Self,max_seq_len,embed_model_dim):
         '''
         Args:
             seq_len: length of input sequence
@@ -50,7 +52,7 @@ class PositionalEmbedding(nn.Module):
         self.register_buffer('pe', pe)
 
 
-    def forward(self, x):
+    def forward(self: Self, x):
         '''
         Args:
             x: input vector
@@ -65,7 +67,7 @@ class PositionalEmbedding(nn.Module):
     
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim=512, n_heads=8):
+    def __init__(self: Self, embed_dim=512, n_heads=8):
         '''
         Args:
             embed_dim: dimension of embeding vector output
@@ -82,7 +84,7 @@ class MultiHeadAttention(nn.Module):
         self.value_matrix = nn.Linear(self.single_head_dim ,self.single_head_dim , bias=False)
         self.out = nn.Linear(self.n_heads*self.single_head_dim ,self.embed_dim) 
 
-    def forward(self,key,query,value,mask=None):     
+    def forward(self: Self,key,query,value,mask=None):     
         '''
         Args:
            key : key vector
@@ -129,7 +131,7 @@ class MultiHeadAttention(nn.Module):
     
 
 class EncoderBlock(nn.Module):
-    def __init__(self, embed_dim, expansion_factor=4, n_heads=8):
+    def __init__(self: Self, embed_dim, expansion_factor=4, n_heads=8):
         super(EncoderBlock, self).__init__()
         
         '''
@@ -153,7 +155,7 @@ class EncoderBlock(nn.Module):
         self.dropout1 = nn.Dropout(0.2)
         self.dropout2 = nn.Dropout(0.2)
 
-    def forward(self,key,query,value):
+    def forward(self: Self,key,query,value):
         
         '''
         Args:
@@ -188,7 +190,7 @@ class TransformerEncoder(nn.Module):
     Returns:
         out: output of the encoder
     '''
-    def __init__(self, seq_len, vocab_size, embed_dim, num_layers=2, expansion_factor=4, n_heads=8):
+    def __init__(self: Self, seq_len, vocab_size, embed_dim, num_layers=2, expansion_factor=4, n_heads=8):
         super(TransformerEncoder, self).__init__()
         
         self.embedding_layer = Embedding(vocab_size, embed_dim)
@@ -196,7 +198,7 @@ class TransformerEncoder(nn.Module):
 
         self.layers = nn.ModuleList([EncoderBlock(embed_dim, expansion_factor, n_heads) for i in range(num_layers)])
     
-    def forward(self, x):
+    def forward(self: Self, x):
         embed_out = self.embedding_layer(x)
         out = self.positional_encoder(embed_out)
         for layer in self.layers:
@@ -206,7 +208,7 @@ class TransformerEncoder(nn.Module):
 
 
 class DecoderBlock(nn.Module):
-    def __init__(self, embed_dim, expansion_factor=4, n_heads=8):
+    def __init__(self: Self, embed_dim, expansion_factor=4, n_heads=8):
         super(DecoderBlock, self).__init__()
 
         '''
@@ -222,7 +224,7 @@ class DecoderBlock(nn.Module):
         self.transformer_block = EncoderBlock(embed_dim, expansion_factor, n_heads)
         
     
-    def forward(self, key, query, x,mask):
+    def forward(self: Self, key, query, x,mask):
         
         '''
         Args:
@@ -246,7 +248,7 @@ class DecoderBlock(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, target_vocab_size, embed_dim, seq_len, num_layers=2, expansion_factor=4, n_heads=8):
+    def __init__(self: Self, target_vocab_size, embed_dim, seq_len, num_layers=2, expansion_factor=4, n_heads=8):
         super(TransformerDecoder, self).__init__()
         '''  
         Args:
@@ -271,7 +273,7 @@ class TransformerDecoder(nn.Module):
         self.fc_out = nn.Linear(embed_dim, target_vocab_size)
         self.dropout = nn.Dropout(0.2)
 
-    def forward(self, x, enc_out, mask):
+    def forward(self: Self, x, enc_out, mask):
         
         '''
         Args:
@@ -296,7 +298,7 @@ class TransformerDecoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, embed_dim, src_vocab_size, target_vocab_size, seq_length,num_layers=2, expansion_factor=4, n_heads=8):
+    def __init__(self: Self, embed_dim, src_vocab_size, target_vocab_size, seq_length,num_layers=2, expansion_factor=4, n_heads=8):
         super(Transformer, self).__init__()
         
         '''  
@@ -317,7 +319,7 @@ class Transformer(nn.Module):
         self.decoder = TransformerDecoder(target_vocab_size, embed_dim, seq_length, num_layers=num_layers, expansion_factor=expansion_factor, n_heads=n_heads)
         
     
-    def make_trg_mask(self, trg):
+    def make_trg_mask(self: Self, trg):
         '''
         Args:
             trg: target sequence
@@ -331,7 +333,7 @@ class Transformer(nn.Module):
         )
         return trg_mask    
 
-    def decode(self,src,trg):
+    def decode(self: Self,src,trg):
         '''
         for inference
         Args:
@@ -357,7 +359,7 @@ class Transformer(nn.Module):
         
         return out_labels
     
-    def forward(self, src, trg):
+    def forward(self: Self, src, trg):
         '''
         Args:
             src: input to encoder 
@@ -376,10 +378,10 @@ class Model:
     '''
         This class is responsible for the NLP model of the chatbot.
     '''
-    def __init__(self, path_to_dataset: str) -> None:
+    def __init__(self: Self, path_to_dataset: str) -> None:
         self.__dataset = path_to_dataset
 
-    def fit() -> None:
+    def fit(self: Self) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
@@ -387,9 +389,13 @@ class Model:
         '''
         # self.__model = Transformer(...)
         # self.__tokenizer = Tokenizer(...)
+        with open(self.__dataset, 'r') as f:
+            data = csv.reader(f)
+        
+
         pass
 
-    def predict(message: str) -> str:
+    def predict(self: Self, message: str) -> str:
         '''
             This method is responsible for returning the answer of the model for the chatbot.
             It receives a message, tokenizes it, and passes it to the Transformers Model

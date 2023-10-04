@@ -8,7 +8,6 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
     if args.args[0] == 'run':
-        print('run')
         path = pathlib.Path('.') / 'src' / 'main' / 'main' / 'main.py'
         subprocess.run(f'python {path.absolute()}', shell=True)
 

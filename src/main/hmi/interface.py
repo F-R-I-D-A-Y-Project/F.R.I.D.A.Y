@@ -6,8 +6,13 @@ from shell.msc import MSC
 from model.model import Model
 
 BG_GRAY = "#ABB2B9"
+BG_GRAY_2 = "#444654" # chatGPT
 BG_COLOR = "#17202A"
+BG_COLOR_2 =  "#343541" # chatGPT
+BG_COLOR_3 = "#202123" # chatGPT
 TEXT_COLOR = "#EAECEE"
+TEXT_COLOR_2 = "#40414F" # chatGPT
+
 
 FONT = "Helvetica 14"
 FONT_BOLD = "Helvetica 13 bold"
@@ -64,16 +69,21 @@ class HMI:
         bottom_label = tk.Label(self.gui, bg=BG_GRAY, height=80)
         bottom_label.place(relwidth=1, rely=0.825)
 
+        # message box
+        bottom_label2 = tk.Label(bottom_label, bg=BG_COLOR, height=80)
+        bottom_label2.place(relwidth=0.74 + 0.24, relheight=0.06, rely=0.008, relx=0.011)
+
+
         # message entry box
-        self.text_box = tk.Entry(bottom_label, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT)
-        self.text_box.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
+        self.text_box = tk.Entry(bottom_label2, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, relief=tk.FLAT, highlightthickness=0, borderwidth=0)
+        self.text_box.place(relwidth=0.9, relheight=1, rely=0, relx=0)
         self.text_box.focus()
         self.text_box.bind("<Return>", self.send)
 
         # send button
-        self.__button = tk.Button(bottom_label, text="Send", font=FONT_BOLD, width=20, bg=BG_GRAY,
-                                  command=self.send)
-        self.__button.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
+        self.__button = tk.Button(bottom_label2, text="Send", font=FONT_BOLD, width=16, bg=BG_GRAY,
+                                  command=self.send, relief=tk.FLAT)
+        self.__button.place(relx=0.9, rely=0.2, relheight=0.6, relwidth=0.1)
         
     def run(self) -> None:
         '''

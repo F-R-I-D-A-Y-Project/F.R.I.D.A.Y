@@ -5,7 +5,7 @@ from hmi.interface import HMI
 from shell.msc import MSC
 
 def main():
-    model = Model()
+    model = Model('ddd')
     hmi = HMI(model)
     hmi.run()
 
