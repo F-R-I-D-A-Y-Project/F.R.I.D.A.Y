@@ -13,31 +13,31 @@ warnings.simplefilter("ignore")
 
 class Embedding(nn.Module):
     def __init__(self, vocab_size, embed_dim):
-        """
+        '''
         Args:
             vocab_size: size of vocabulary
             embed_dim: dimension of embeddings
-        """
+        '''
         super(Embedding, self).__init__()
         self.embed = nn.Embedding(vocab_size, embed_dim)
     def forward(self, x):
-        """
+        '''
         Args:
             x: input vector
         Returns:
             out: embedding vector
-        """
+        '''
         return self.embed(x)
 
 
 
 class PositionalEmbedding(nn.Module):
     def __init__(self,max_seq_len,embed_model_dim):
-        """
+        '''
         Args:
             seq_len: length of input sequence
             embed_model_dim: demension of embedding
-        """
+        '''
         super(PositionalEmbedding, self).__init__()
         self.embed_dim = embed_model_dim
 
@@ -51,12 +51,12 @@ class PositionalEmbedding(nn.Module):
 
 
     def forward(self, x):
-        """
+        '''
         Args:
             x: input vector
         Returns:
             x: output
-        """
+        '''
       
         x = x * math.sqrt(self.embed_dim)
         seq_len = x.size(1)
@@ -66,11 +66,11 @@ class PositionalEmbedding(nn.Module):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim=512, n_heads=8):
-        """
+        '''
         Args:
             embed_dim: dimension of embeding vector output
             n_heads: number of self attention heads
-        """
+        '''
         super(MultiHeadAttention, self).__init__()
 
         self.embed_dim = embed_dim 
@@ -82,9 +82,8 @@ class MultiHeadAttention(nn.Module):
         self.value_matrix = nn.Linear(self.single_head_dim ,self.single_head_dim , bias=False)
         self.out = nn.Linear(self.n_heads*self.single_head_dim ,self.embed_dim) 
 
-    def forward(self,key,query,value,mask=None):    
-        
-        """
+    def forward(self,key,query,value,mask=None):     
+        '''
         Args:
            key : key vector
            query : query vector
@@ -93,7 +92,7 @@ class MultiHeadAttention(nn.Module):
         
         Returns:
            output vector from multihead attention
-        """
+        '''
         batch_size = key.size(0)
         seq_length = key.size(1)
         
@@ -133,13 +132,13 @@ class EncoderBlock(nn.Module):
     def __init__(self, embed_dim, expansion_factor=4, n_heads=8):
         super(EncoderBlock, self).__init__()
         
-        """
+        '''
         Args:
            embed_dim: dimension of the embedding
            expansion_factor: fator ehich determines output dimension of linear layer
            n_heads: number of attention heads
         
-        """
+        '''
         self.attention = MultiHeadAttention(embed_dim, n_heads)
         
         self.norm1 = nn.LayerNorm(embed_dim) 
@@ -156,29 +155,29 @@ class EncoderBlock(nn.Module):
 
     def forward(self,key,query,value):
         
-        """
+        '''
         Args:
            key: key vector
            query: query vector
            value: value vector
            norm2_out: output of transformer block
         
-        """
+        '''
         
-        attention_out = self.attention(key,query,value)  #32x10x512
-        attention_residual_out = attention_out + value  #32x10x512
-        norm1_out = self.dropout1(self.norm1(attention_residual_out)) #32x10x512
+        attention_out = self.attention(key,query,value)  
+        attention_residual_out = attention_out + value  
+        norm1_out = self.dropout1(self.norm1(attention_residual_out)) 
 
-        feed_fwd_out = self.feed_forward(norm1_out) #32x10x512 -> #32x10x2048 -> 32x10x512
-        feed_fwd_residual_out = feed_fwd_out + norm1_out #32x10x512
-        norm2_out = self.dropout2(self.norm2(feed_fwd_residual_out)) #32x10x512
+        feed_fwd_out = self.feed_forward(norm1_out)  
+        feed_fwd_residual_out = feed_fwd_out + norm1_out 
+        norm2_out = self.dropout2(self.norm2(feed_fwd_residual_out)) 
 
         return norm2_out
 
 
 
 class TransformerEncoder(nn.Module):
-    """
+    '''
     Args:
         seq_len : length of input sequence
         embed_dim: dimension of embedding
@@ -188,7 +187,7 @@ class TransformerEncoder(nn.Module):
         
     Returns:
         out: output of the encoder
-    """
+    '''
     def __init__(self, seq_len, vocab_size, embed_dim, num_layers=2, expansion_factor=4, n_heads=8):
         super(TransformerEncoder, self).__init__()
         
@@ -203,20 +202,20 @@ class TransformerEncoder(nn.Module):
         for layer in self.layers:
             out = layer(out,out,out)
 
-        return out  #32x10x512
+        return out  
 
 
 class DecoderBlock(nn.Module):
     def __init__(self, embed_dim, expansion_factor=4, n_heads=8):
         super(DecoderBlock, self).__init__()
 
-        """
+        '''
         Args:
            embed_dim: dimension of the embedding
            expansion_factor: fator ehich determines output dimension of linear layer
            n_heads: number of attention heads
         
-        """
+        '''
         self.attention = MultiHeadAttention(embed_dim, n_heads=8)
         self.norm = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(0.2)
@@ -225,7 +224,7 @@ class DecoderBlock(nn.Module):
     
     def forward(self, key, query, x,mask):
         
-        """
+        '''
         Args:
            key: key vector
            query: query vector
@@ -234,10 +233,10 @@ class DecoderBlock(nn.Module):
         Returns:
            out: output of transformer block
     
-        """
+        '''
         
-        #we need to pass mask mask only to fst attention
-        attention = self.attention(x,x,x,mask=mask) #32x10x512
+        
+        attention = self.attention(x,x,x,mask=mask) 
         value = self.dropout(self.norm(attention + x))
         
         out = self.transformer_block(key, query, value)
@@ -249,7 +248,7 @@ class DecoderBlock(nn.Module):
 class TransformerDecoder(nn.Module):
     def __init__(self, target_vocab_size, embed_dim, seq_len, num_layers=2, expansion_factor=4, n_heads=8):
         super(TransformerDecoder, self).__init__()
-        """  
+        '''  
         Args:
            target_vocab_size: vocabulary size of taget
            embed_dim: dimension of embedding
@@ -258,7 +257,7 @@ class TransformerDecoder(nn.Module):
            expansion_factor: factor which determines number of linear layers in feed forward layer
            n_heads: number of heads in multihead attention
         
-        """
+        '''
         self.word_embedding = nn.Embedding(target_vocab_size, embed_dim)
         self.position_embedding = PositionalEmbedding(seq_len, embed_dim)
 
@@ -274,18 +273,18 @@ class TransformerDecoder(nn.Module):
 
     def forward(self, x, enc_out, mask):
         
-        """
+        '''
         Args:
             x: input vector from target
             enc_out : output from encoder layer
             trg_mask: mask for decoder self attention
         Returns:
             out: output vector
-        """
+        '''
             
         
-        x = self.word_embedding(x)  #32x10x512
-        x = self.position_embedding(x) #32x10x512
+        x = self.word_embedding(x)  
+        x = self.position_embedding(x) 
         x = self.dropout(x)
      
         for layer in self.layers:
@@ -300,7 +299,7 @@ class Transformer(nn.Module):
     def __init__(self, embed_dim, src_vocab_size, target_vocab_size, seq_length,num_layers=2, expansion_factor=4, n_heads=8):
         super(Transformer, self).__init__()
         
-        """  
+        '''  
         Args:
            embed_dim:  dimension of embedding 
            src_vocab_size: vocabulary size of source
@@ -310,7 +309,7 @@ class Transformer(nn.Module):
            expansion_factor: factor which determines number of linear layers in feed forward layer
            n_heads: number of heads in multihead attention
         
-        """
+        '''
         
         self.target_vocab_size = target_vocab_size
 
@@ -319,37 +318,36 @@ class Transformer(nn.Module):
         
     
     def make_trg_mask(self, trg):
-        """
+        '''
         Args:
             trg: target sequence
         Returns:
             trg_mask: target mask
-        """
+        '''
         batch_size, trg_len = trg.shape
-        # returns the lower triangular part of matrix filled with ones
+        
         trg_mask = torch.tril(torch.ones((trg_len, trg_len))).expand(
             batch_size, 1, trg_len, trg_len
         )
         return trg_mask    
 
     def decode(self,src,trg):
-        """
+        '''
         for inference
         Args:
             src: input to encoder 
             trg: input to decoder
         out:
             out_labels : returns final prediction of sequence
-        """
+        '''
         trg_mask = self.make_trg_mask(trg)
         enc_out = self.encoder(src)
         out_labels = []
         batch_size,seq_len = src.shape[0],src.shape[1]
         #outputs = torch.zeros(seq_len, batch_size, self.target_vocab_size)
         out = trg
-        for i in range(seq_len): #10
-            out = self.decoder(out,enc_out,trg_mask) #bs x seq_len x vocab_dim
-            # taking the last token
+        for i in range(seq_len): 
+            out = self.decoder(out,enc_out,trg_mask) 
             out = out[:,-1,:]
      
             out = out.argmax(-1)
@@ -360,13 +358,13 @@ class Transformer(nn.Module):
         return out_labels
     
     def forward(self, src, trg):
-        """
+        '''
         Args:
             src: input to encoder 
             trg: input to decoder
         out:
             out: final vector which returns probabilities of each target word
-        """
+        '''
         trg_mask = self.make_trg_mask(trg)
         enc_out = self.encoder(src)
    
@@ -378,4 +376,23 @@ class Model:
     '''
         This class is responsible for the NLP model of the chatbot.
     '''
-    pass
+    def __init__(self, path_to_dataset: str) -> None:
+        self.__dataset = path_to_dataset
+
+    def fit() -> None:
+        '''
+            This method is responsible for training the model.
+            It reads the dataset, captures the amount of unique words existent in the dataset, 
+            creates the Transformers Model and trains it
+        '''
+        # self.__model = Transformer(...)
+        # self.__tokenizer = Tokenizer(...)
+        pass
+
+    def predict(message: str) -> str:
+        '''
+            This method is responsible for returning the answer of the model for the chatbot.
+            It receives a message, tokenizes it, and passes it to the Transformers Model
+        '''
+
+        pass
