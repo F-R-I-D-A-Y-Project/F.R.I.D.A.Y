@@ -6,8 +6,9 @@ from shell.msc import MSC
 
 def main():
     model = Model('ddd')
-    hmi = HMI(model)
-    hmi.run()
+    with MSC() as msc:
+        hmi = HMI(model, msc)
+        hmi.run()
 
 if __name__ == "__main__":
     main()

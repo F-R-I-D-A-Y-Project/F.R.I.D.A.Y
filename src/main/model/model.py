@@ -393,7 +393,7 @@ class Model:
         '''
         # self.__model = Transformer(...)
         # self.__tokenizer = Tokenizer(...)
-        if (pathlib.Path('.') / 'model.pkl').exists():
+        if (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').exists():
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
         else:
@@ -404,11 +404,14 @@ class Model:
             This method is responsible for returning the answer of the model for the chatbot.
             It receives a message, tokenizes it, and passes it to the Transformers Model
         '''
+        return '?'
 
     def __serialize_model(self: Self) -> None:
         '''
             Serializes the model into a pickle file to avoid retraining it every time the chatbot is executed.
         '''
+        with open('model.pkl', 'wb') as f:
+            pickle.dump(self.__model, f)
 
     def __train(self: Self) -> None:
         '''
@@ -417,6 +420,8 @@ class Model:
         with open(self.__dataset, 'r') as f:
             data = csv.reader(f)
 
+        self.__serialize_model()
+
     def check_db_change(self: Self) -> None:
         '''
             Verifies changes in the dataset. If there are changes, it will delete the serialized model.
@@ -424,6 +429,6 @@ class Model:
         out = subprocess.run(f'git diff {self.__dataset}', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute(),
                        capture_output=True).stdout.strip()
         if out:
-            subprocess.run(f'rm model.pkl', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+            subprocess.run(f'rm -f model.pkl', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
             subprocess.run([f'git add {self.__dataset}', 'git commit -m "Update dataset"'], shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
             

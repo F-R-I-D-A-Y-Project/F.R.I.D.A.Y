@@ -22,8 +22,9 @@ class HMI:
     '''
         This class is the GUI of the chatbot.
     '''
-    def __init__(self: Self, model) -> None:
+    def __init__(self: Self, model: Model, msc: MSC) -> None:
         self.__model = model
+        self.__msc = msc
         self.__answer = ''
         self.__gui = tk.Tk()
         self.initialize()
@@ -106,7 +107,11 @@ class HMI:
         while answer:=self.answer_to(message) == self.__answer:
             continue
         self.__answer = self.answer_to(message)
+
+        #! change this so the formatting of commands are properly dealt with
         self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
+        
+        #! command execution part of the code
         # if '@shell' in answer:
         #    answer.split('@shell ')[1].split('/@shell')[0]
         #    ...
@@ -119,6 +124,16 @@ class HMI:
 
         self.text_area.configure(state=tk.DISABLED)
 
+    def approved(self: Self, event=None) -> None:
+        '''
+            This method is called when the like button is hit, triggering a change in the training dataset of the bot.
+        '''
+
+    def regenerate_response(self: Self, event=None) -> None:
+        '''
+            This method is called when the regenerate button is hit, resending the previous prompt to the bot.
+        '''
+
     def answer_to(self: Self, message: str) -> str:
         '''
             This method returns the answer of the chatbot to a message.
@@ -128,5 +143,5 @@ class HMI:
         # if answer.startswith("@command: "):
         #     with MCS() as mcs:
         #         answer = mcs.send(answer[10:])
-        
-        return '?'
+        self.model.check_db_change()
+        return self.model.predict(message)
