@@ -22,12 +22,15 @@ class Process:
             This method sends a message to the shell and returns the output of the command.
         '''
         self.child_process.sendline(message)
-        self.child_process.expect(r'\$')
-        return self.child_process.before.decode("utf-8")
+        self.child_process.expect_exact(message)
+        self.child_process.expect_exact('$')
+        ret: str = self.child_process.before.decode("utf-8")
+        ret = '\n'.join(ret.split('\n')[1: -2]).replace('\r', '')
+        return ret
 
     def __enter__(self) -> pexpect.spawn:
         self.child_process = pexpect.spawn(self.init_cmd)
-        self.child_process.expect(r'\$')
+        # self.child_process.expect(r'\$')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -36,7 +39,7 @@ class Process:
 
 def main():
     with Process() as mcs:
-        print(mcs.send("echo aaa"))
+        print(mcs.send("ls"))
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
-from src.main.shell.process import Process
-from hmi.interface import HMI
-from model.model import Model
 import sys
 import pathlib
+
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
+
+from shell.process import Process
+from hmi.interface import HMI
+from model.model import Model
 
 
 def main():

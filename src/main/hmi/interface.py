@@ -1,10 +1,12 @@
-from model.model import Model
-from src.main.shell.process import Process
-import tkinter as tk
 import sys
 import pathlib
-from typing import Self
+
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
+
+from shell.process import Process
+from model.model import Model
+import tkinter as tk
+from typing import Self
 
 
 BG_GRAY = "#ABB2B9"
