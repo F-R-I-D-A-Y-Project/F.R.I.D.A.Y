@@ -3,7 +3,9 @@ function activate_venv(){
     python -m venv env
     source env/bin/activate
     pip install -r requirements.txt
-    deactivate
+    if [ $1 != "--activate" ]; then
+        deactivate
+    fi
 }
 
 function friday(){

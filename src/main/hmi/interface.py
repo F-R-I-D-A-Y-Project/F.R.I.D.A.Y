@@ -1,45 +1,48 @@
-import sys, pathlib
+from model.model import Model
+from src.main.shell.process import Process
+import tkinter as tk
+import sys
+import pathlib
 from typing import Self
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
-import tkinter as tk
-from shell.msc import MSC
-from model.model import Model
 
 BG_GRAY = "#ABB2B9"
-BG_GRAY_2 = "#444654" # chatGPT
+BG_GRAY_2 = "#444654"  # chatGPT
 BG_COLOR = "#17202A"
-BG_COLOR_2 =  "#343541" # chatGPT
-BG_COLOR_3 = "#202123" # chatGPT
+BG_COLOR_2 = "#343541"  # chatGPT
+BG_COLOR_3 = "#202123"  # chatGPT
 TEXT_COLOR = "#EAECEE"
-TEXT_COLOR_2 = "#40414F" # chatGPT
+TEXT_COLOR_2 = "#40414F"  # chatGPT
 
 
 FONT = "Helvetica 14"
 FONT_BOLD = "Helvetica 13 bold"
 
+
 class HMI:
     '''
         This class is the GUI of the chatbot.
     '''
-    def __init__(self: Self, model: Model, msc: MSC) -> None:
+
+    def __init__(self: Self, model: Model, proc: Process) -> None:
         self.__model = model
-        self.__msc = msc
+        self.__proc = proc
         self.__answer = ''
         self.__gui = tk.Tk()
         self.initialize()
 
     @property
     def model(self: Self):
-        return self.__model    
+        return self.__model
 
     @property
     def gui(self: Self):
         '''
-        
+
         '''
         return self.__gui
-    
+
     def initialize(self: Self):
         '''
             This method initializes the GUI.
@@ -50,8 +53,7 @@ class HMI:
 
         # head label
         head_label = tk.Label(self.gui, bg=BG_COLOR, fg=TEXT_COLOR,
-                              text="F.R.I.D.A.Y",
-                              font=FONT_BOLD, pady=10)
+                              text="F.R.I.D.A.Y.", font=FONT_BOLD, pady=10)
         head_label.place(relwidth=1)
 
         # tiny divider
@@ -59,7 +61,8 @@ class HMI:
         line.place(relwidth=1, rely=0.07, relheight=0.012)
 
         # text widget
-        self.text_area = tk.Text(self.gui, width=20, height=2, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, padx=5, pady=5)
+        self.text_area = tk.Text(self.gui, width=20, height=2,
+                                 bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, padx=5, pady=5)
         self.text_area.place(relheight=0.745, relwidth=1, rely=0.08)
         self.text_area.configure(cursor="arrow", state=tk.DISABLED)
 
@@ -74,11 +77,12 @@ class HMI:
 
         # message box
         bottom_label2 = tk.Label(bottom_label, bg=BG_COLOR, height=80)
-        bottom_label2.place(relwidth=0.74 + 0.24, relheight=0.06, rely=0.008, relx=0.011)
-
+        bottom_label2.place(relwidth=0.74 + 0.24,
+                            relheight=0.06, rely=0.008, relx=0.011)
 
         # message entry box
-        self.text_box = tk.Entry(bottom_label2, bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, relief=tk.FLAT, highlightthickness=0, borderwidth=0)
+        self.text_box = tk.Entry(bottom_label2, bg=BG_COLOR, fg=TEXT_COLOR,
+                                 font=FONT, relief=tk.FLAT, highlightthickness=0, borderwidth=0)
         self.text_box.place(relwidth=0.9, relheight=1, rely=0, relx=0)
         self.text_box.focus()
         self.text_box.bind("<Return>", self.send)
@@ -87,7 +91,7 @@ class HMI:
         self.__button = tk.Button(bottom_label2, text="Send", font=FONT_BOLD, width=16, bg=BG_GRAY,
                                   command=self.send, relief=tk.FLAT)
         self.__button.place(relx=0.9, rely=0.2, relheight=0.6, relwidth=0.1)
-        
+
     def run(self) -> None:
         '''
             This method runs the GUI.
@@ -104,20 +108,17 @@ class HMI:
         self.text_box.delete(0, tk.END)
         self.text_area.configure(state=tk.NORMAL)
         self.text_area.insert(tk.END, "You: " + message + '\n\n')
-        while answer:=self.answer_to(message) == self.__answer:
+        while answer := self.answer_to(message) == self.__answer:
             continue
         self.__answer = self.answer_to(message)
 
         #! change this so the formatting of commands are properly dealt with
         self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
-        
+
         #! command execution part of the code
-        # if '@shell' in answer:
-        #    answer.split('@shell ')[1].split('/@shell')[0]
-        #    ...
-        # elif '@psh' in answer:
-        #    answer.split('@psh ')[1].split('/@psh')[0]
-        #    ...
+        if '@shell' in answer:
+            command = answer.split('@shell ')[1].split('/@shell')[0]
+            ret = self.__proc.send(command)
         # elif '@code' in answer:
         #    answer.split('@code ')[1].split('/@code')[0]
         #    ...
@@ -138,10 +139,9 @@ class HMI:
         '''
             This method returns the answer of the chatbot to a message.
         '''
-        
+
         # answer: str = self.model.predict(message)
         # if answer.startswith("@command: "):
-        #     with MCS() as mcs:
-        #         answer = mcs.send(answer[10:])
+        #     answer = self.__mcs.send(answer[10:])
         self.model.check_db_change()
         return self.model.predict(message)

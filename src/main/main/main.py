@@ -1,14 +1,17 @@
-import sys, pathlib
-sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
-from model.model import Model
+from src.main.shell.process import Process
 from hmi.interface import HMI
-from shell.msc import MSC
+from model.model import Model
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
+
 
 def main():
     model = Model('ddd')
-    with MSC() as msc:
+    with Process() as msc:
         hmi = HMI(model, msc)
         hmi.run()
+
 
 if __name__ == "__main__":
     main()
