@@ -1,5 +1,3 @@
-import subprocess
-import os
 import pexpect
 import platform
 
@@ -20,6 +18,9 @@ class Process:
     def send(self, message: str) -> None:
         '''
             This method sends a message to the shell and returns the output of the command.
+
+            Args:
+                message (str): The message or command to be sent to the shell.
         '''
         self.child_process.sendline(message)
         self.child_process.expect_exact(message)
@@ -34,7 +35,6 @@ class Process:
 
     def __enter__(self) -> pexpect.spawn:
         self.child_process = pexpect.spawn(self.init_cmd)
-        # self.child_process.expect(r'\$')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -43,7 +43,7 @@ class Process:
 
 def main():
     with Process() as mcs:
-        print(mcs.send("touch test.txt"))
+        print(mcs.send("ls -la"))
 
 
 if __name__ == "__main__":

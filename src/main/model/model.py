@@ -379,17 +379,28 @@ class Model:
         This class is responsible for the NLP model of the chatbot.
     '''
     def __init__(self: Self, path_to_dataset: str) -> None:
+        '''
+            Constructor of the class. It receives the path to the dataset, but does not train the model.
+            
+            Args:
+                path_to_dataset (str): path to dataset used for training
+        '''
         self.__dataset = path_to_dataset
-        self.fit()
 
-    def fit(self: Self) -> None:
+    def fit(self: Self, path_to_dataset: str|None=None) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
             creates the Transformers Model and trains it
 
             If the dataset was unchanged, it loads the model from the pickle file. If not, the training algorithm will be executed.
+
+            Args:
+                path_to_dataset (str): path to dataset used for training
         '''
+        if path_to_dataset:
+            self.__dataset = path_to_dataset
+
         # self.__model = Transformer(...)
         # self.__tokenizer = Tokenizer(...)
         if (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').exists():
@@ -402,6 +413,10 @@ class Model:
         '''
             This method is responsible for returning the answer of the model for the chatbot.
             It receives a message, tokenizes it, and passes it to the Transformers Model
+
+            Args:
+                message (str): message to be answered by the chatbot
+
         '''
         return '?'
 

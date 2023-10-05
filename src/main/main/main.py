@@ -10,8 +10,8 @@ from model.model import Model
 
 def main():
     model = Model('ddd')
-    with Process() as msc:
-        hmi = HMI(model, msc)
+    with Process() as proc:
+        hmi = HMI(model, proc)
         hmi.run()
 
 

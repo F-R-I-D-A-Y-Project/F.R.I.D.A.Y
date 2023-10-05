@@ -10,12 +10,13 @@ from typing import Self
 
 
 BG_GRAY = "#ABB2B9"
-BG_GRAY_2 = "#444654"  # chatGPT
 BG_COLOR = "#17202A"
-BG_COLOR_2 = "#343541"  # chatGPT
-BG_COLOR_3 = "#202123"  # chatGPT
 TEXT_COLOR = "#EAECEE"
-TEXT_COLOR_2 = "#40414F"  # chatGPT
+
+GPT_LEFT_TAB = "#202123" 
+GPT_BOT_ANSWER = "#343541" 
+GPT_USER_INPUT = "#444654" 
+GPT_TEXT_BOX = "#40414F" 
 
 
 FONT = "Helvetica 14"
@@ -36,12 +37,15 @@ class HMI:
 
     @property
     def model(self: Self):
+        '''
+            This property returns the model.
+        '''
         return self.__model
 
     @property
     def gui(self: Self):
         '''
-
+            This property returns the GUI.
         '''
         return self.__gui
 
@@ -49,6 +53,7 @@ class HMI:
         '''
             This method initializes the GUI.
         '''
+        # self.model.fit()
         self.gui.title("Chat")
         self.gui.resizable(width=True, height=True)
         self.gui.configure(width=470, height=550, bg=BG_COLOR)
@@ -103,6 +108,9 @@ class HMI:
     def send(self: Self, event=None) -> None:
         '''
             This method sends a message to the chatbot.
+
+            Args:
+                event (tk.Event): The event that triggered the method.
         '''
         message = self.text_box.get()
         if not message:
@@ -130,16 +138,25 @@ class HMI:
     def approved(self: Self, event=None) -> None:
         '''
             This method is called when the like button is hit, triggering a change in the training dataset of the bot.
+
+            Args:
+                event (tk.Event): The event that triggered the method.
         '''
 
     def regenerate_response(self: Self, event=None) -> None:
         '''
             This method is called when the regenerate button is hit, resending the previous prompt to the bot.
+
+            Args:
+                event (tk.Event): The event that triggered the method.
         '''
 
     def answer_to(self: Self, message: str) -> str:
         '''
             This method returns the answer of the chatbot to a message.
+
+            Args:
+                message (str): The message to which the chatbot will answer.
         '''
 
         # answer: str = self.model.predict(message)
