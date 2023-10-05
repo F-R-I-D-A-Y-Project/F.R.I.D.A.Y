@@ -13,26 +13,6 @@ from typing import Self
 warnings.simplefilter("ignore")
 
 
-class Embedding(nn.Module):
-    def __init__(self: Self, vocab_size, embed_dim):
-        '''
-        Args:
-            vocab_size: size of vocabulary
-            embed_dim: dimension of embeddings
-        '''
-        super(Embedding, self).__init__()
-        self.embed = nn.Embedding(vocab_size, embed_dim)
-    def forward(self: Self, x):
-        '''
-        Args:
-            x: input vector
-        Returns:
-            out: embedding vector
-        '''
-        return self.embed(x)
-
-
-
 class PositionalEmbedding(nn.Module):
     def __init__(self: Self,max_seq_len,embed_model_dim):
         '''
@@ -100,13 +80,9 @@ class MultiHeadAttention(nn.Module):
         
         seq_length_query = query.size(1)
         
-        key = key.view(batch_size, seq_length, self.n_heads, self.single_head_dim)  
-        query = query.view(batch_size, seq_length_query, self.n_heads, self.single_head_dim) 
-        value = value.view(batch_size, seq_length, self.n_heads, self.single_head_dim) 
-       
-        k = self.key_matrix(key)
-        q = self.query_matrix(query)   
-        v = self.value_matrix(value)
+        k = self.key_matrix(key.view(batch_size, seq_length, self.n_heads, self.single_head_dim))
+        q = self.query_matrix(query.view(batch_size, seq_length_query, self.n_heads, self.single_head_dim))   
+        v = self.value_matrix(value.view(batch_size, seq_length, self.n_heads, self.single_head_dim) )
 
         q = q.transpose(1,2)
         k = k.transpose(1,2)  
@@ -193,7 +169,7 @@ class TransformerEncoder(nn.Module):
     def __init__(self: Self, seq_len, vocab_size, embed_dim, num_layers=2, expansion_factor=4, n_heads=8):
         super(TransformerEncoder, self).__init__()
         
-        self.embedding_layer = Embedding(vocab_size, embed_dim)
+        self.embedding_layer = nn.Embedding(vocab_size, embed_dim)
         self.positional_encoder = PositionalEmbedding(seq_len, embed_dim)
 
         self.layers = nn.ModuleList([EncoderBlock(embed_dim, expansion_factor, n_heads) for i in range(num_layers)])
@@ -401,8 +377,6 @@ class Model:
         if path_to_dataset:
             self.__dataset = path_to_dataset
 
-        # self.__model = Transformer(...)
-        # self.__tokenizer = Tokenizer(...)
         if (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').exists():
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
@@ -418,7 +392,9 @@ class Model:
                 message (str): message to be answered by the chatbot
 
         '''
-        return '?'
+        return self.__model(message)
+
+    __call__ = predict
 
     def __serialize_model(self: Self) -> None:
         '''
