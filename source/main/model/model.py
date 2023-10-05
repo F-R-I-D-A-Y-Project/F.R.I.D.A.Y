@@ -392,7 +392,9 @@ class Model:
                 message (str): message to be answered by the chatbot
 
         '''
-        return self.__model(message)
+        trg = None #?
+        return self.__model.decode(message, trg)
+
 
     __call__ = predict
 
@@ -410,7 +412,7 @@ class Model:
         '''
         with open(self.__dataset, 'r') as f:
             data = csv.reader(f)
-
+        self.__model = Transformer(512, 10000, 10000, 100)
         self.__serialize_model()
 
     def check_db_change(self: Self) -> None:

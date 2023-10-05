@@ -9,7 +9,7 @@ from model.model import Model
 
 
 def main():
-    model = Model('ddd')
+    model = Model('datasets/example.txt')
     with Process() as proc:
         hmi = HMI(model, proc)
         hmi.run()
