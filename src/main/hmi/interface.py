@@ -114,17 +114,17 @@ class HMI:
             continue
         self.__answer = self.answer_to(message)
 
-        #! change this so the formatting of commands are properly dealt with
-        self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
-
         #! command execution part of the code
         if '@shell' in answer:
             command = answer.split('@shell ')[1].split('/@shell')[0]
-            ret = self.__proc.send(command)
+            cmd_ret = self.__proc.send(command)
         # elif '@code' in answer:
         #    answer.split('@code ')[1].split('/@code')[0]
         #    ...
 
+        #! change this so the formatting of commands are properly dealt with
+        self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
+        
         self.text_area.configure(state=tk.DISABLED)
 
     def approved(self: Self, event=None) -> None:

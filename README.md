@@ -5,10 +5,8 @@ Python project developed for the discipline "Laboratório de Programação 2", a
 
 ## About 
 
-F.R.I.D.A.Y is a personal assistant AI developed in Python...
-
-Architecture used: Transformers
-...
+F.R.I.D.A.Y is a chatbot and personal assistant AI developed in Python. Capable of answering question made by user and executing shell commands for the user. It was developed using the Transformers architecture, and 
+it is serialized so the model doesn't need to be trained every time
 
 ## Team members
 
@@ -18,14 +16,19 @@ Architecture used: Transformers
 
 ## Compatibility
 
-As of now, F.R.I.D.A.Y is compatible with Python 3.10+
+F.R.I.D.A.Y is compatible with Python 3.10+
 
 ### Frameworks used
 
-- Numpy
-- Pytorch
-- Pandas
-- ...
+- [Pexpect](https://pexpect.readthedocs.io/en/stable/)
+- [Pytorch](https://pytorch.org/docs/stable/index.html)
+- [Platform](https://docs.python.org/3/library/platform.html)
+- [TKinter](https://docs.python.org/3/library/tkinter.html)
+- [Subprocess](https://docs.python.org/3/library/subprocess.html)
+- [Pathlib](https://docs.python.org/3/library/pathlib.html)
+- [Csv](https://docs.python.org/3/library/csv.html)
+- [Pickle](https://docs.python.org/3/library/pickle.html)
+- [Torchtext](https://pytorch.org/text/stable/index.html)
 
 ## How to use
 To create and activate the Python virtual environment, use:
@@ -43,16 +46,13 @@ activate_venv
 InitVenv
 ```
 
-Then, all you have to do is run either
-``` sh
-python runner.py run
-```
-on your terminal or simply use:
+Then, all you have to do is run :
 
 ``` sh
 friday run
 ```
-after placing ``` source init_venv.sh``` (or ``` . .\init_venv.ps1```) in your PATH
+
+on your terminal after executing ``` source init_venv.sh``` (or ``` . .\init_venv.ps1```)
 
 ## Documentation
 

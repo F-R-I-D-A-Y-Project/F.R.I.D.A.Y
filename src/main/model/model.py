@@ -5,9 +5,7 @@ import math,copy,re
 import warnings
 import pandas as pd
 import numpy as np
-import seaborn as sns
 import torchtext
-import matplotlib.pyplot as plt
 import csv, json, pickle
 import pathlib
 import subprocess
@@ -382,6 +380,7 @@ class Model:
     '''
     def __init__(self: Self, path_to_dataset: str) -> None:
         self.__dataset = path_to_dataset
+        self.fit()
 
     def fit(self: Self) -> None:
         '''
@@ -410,7 +409,8 @@ class Model:
         '''
             Serializes the model into a pickle file to avoid retraining it every time the chatbot is executed.
         '''
-        with open('model.pkl', 'wb') as f:
+
+        with (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').open('wb') as f:
             pickle.dump(self.__model, f)
 
     def __train(self: Self) -> None:

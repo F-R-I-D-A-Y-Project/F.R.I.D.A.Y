@@ -25,8 +25,12 @@ class Process:
         self.child_process.expect_exact(message)
         self.child_process.expect_exact('$')
         ret: str = self.child_process.before.decode("utf-8")
-        ret = '\n'.join(ret.split('\n')[1: -2]).replace('\r', '')
-        return ret
+        try:
+            ret = '\n'.join(ret.split('\n')[1: -2])
+        except IndexError:
+            ret = ''
+        finally:
+            return ret
 
     def __enter__(self) -> pexpect.spawn:
         self.child_process = pexpect.spawn(self.init_cmd)
@@ -39,7 +43,7 @@ class Process:
 
 def main():
     with Process() as mcs:
-        print(mcs.send("ls"))
+        print(mcs.send("touch test.txt"))
 
 
 if __name__ == "__main__":
