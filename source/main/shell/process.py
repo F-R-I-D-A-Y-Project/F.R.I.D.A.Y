@@ -15,15 +15,19 @@ class Process:
             self.init_cmd = "bash"
         self.child_process: pexpect.spawn
 
-    def send(self, message: str) -> None:
+    def send(self, message: str | list[str]) -> None:
         '''
             This method sends a message to the shell and returns the output of the command.
 
             Args:
                 message (str): The message or command to be sent to the shell.
         '''
-        self.child_process.sendline(message)
-        self.child_process.expect_exact(message)
+        if isinstance(message, list):
+            self.child_process.sendline('; '.join(message))
+            self.child_process.expect_exact('; '.join(message))
+        else:
+            self.child_process.sendline(message)
+            self.child_process.expect_exact(message)
         self.child_process.expect_exact('$')
         ret: str = self.child_process.before.decode("utf-8")
         try:
@@ -43,7 +47,7 @@ class Process:
 
 def main():
     with Process() as mcs:
-        print(mcs.send("ls -la"))
+        print(mcs.send(["ls -la", "pwd"]))
 
 
 if __name__ == "__main__":

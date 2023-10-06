@@ -1,12 +1,11 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-import math,copy,re
-import warnings
-import pandas as pd
-import numpy as np
 import torchtext
-import csv, json, pickle
+
+import math
+import warnings
+import csv, pickle
 import pathlib
 import subprocess
 from typing import Self
@@ -362,6 +361,7 @@ class Model:
                 path_to_dataset (str): path to dataset used for training
         '''
         self.__dataset = path_to_dataset
+        self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def fit(self: Self, path_to_dataset: str|None=None) -> None:
         '''
