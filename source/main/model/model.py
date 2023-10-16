@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 import torchtext
-
 import math
 import warnings
 import csv, pickle
@@ -363,7 +362,7 @@ class Model:
         self.__dataset = path_to_dataset
         self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def fit(self: Self, path_to_dataset: str|None=None) -> None:
+    def fit(self: Self, path_to_dataset: str|None=None, epochs: int=100) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
@@ -381,7 +380,7 @@ class Model:
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
         else:
-            self.__train()
+            self.__train(epochs)
 
     def predict(self: Self, message: str) -> str:
         '''
@@ -406,13 +405,22 @@ class Model:
         with (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').open('wb') as f:
             pickle.dump(self.__model, f)
 
-    def __train(self: Self) -> None:
+    def __train(self: Self, epochs: int) -> None:
         '''
             Training algorithm of the Tranformers model
         '''
+
         with open(self.__dataset, 'r') as f:
             data = csv.reader(f)
-        self.__model = Transformer(512, 10000, 10000, 100)
+
+        self.__model = Transformer(512, 10000, 10000, 100).to(self.__device)
+
+        for epoch in range(epochs):
+            self.__model.train()
+            ...
+
+        print(self.__model.parameters())
+        
         self.__serialize_model()
 
     def check_db_change(self: Self) -> None:
@@ -424,4 +432,3 @@ class Model:
         if out:
             subprocess.run(f'rm -f model.pkl', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
             subprocess.run([f'git add {self.__dataset}', 'git commit -m "Update dataset"'], shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
-            
