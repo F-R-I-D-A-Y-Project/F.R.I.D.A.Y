@@ -4,7 +4,7 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 from shell.process import Process
-from model.model import Model
+from source.main.model.model import Model
 import tkinter as tk
 from typing import Self
 
