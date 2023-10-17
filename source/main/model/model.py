@@ -86,13 +86,19 @@ class Model:
 
     __call__ = predict
     
-    def check_db_change(self: Self, commit_on_change: bool=False) -> None:
+    def check_db_change(self: Self, commit_on_change: bool=True) -> None:
         '''
             Verifies changes in the dataset. If there are changes, it will delete the serialized model.
+
+            OBS: The changes are verified via git, so in order to properly verify the difference, commits will be made
+            every time 
         '''
-        out = subprocess.run(f'git diff {self.__dataset}', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute(),
+        out = subprocess.run(f'git diff {self.__dataset}/../approved.csv', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute(),
                        capture_output=True).stdout.strip()
         if out:
             subprocess.run(f'rm -f model.pkl', shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+            self.__update_dataset()
             if commit_on_change:
-                subprocess.run([f'git add {self.__dataset}', 'git commit -m "Update dataset"'], shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+                subprocess.run([f'git add .', 'git commit -am "Update dataset" --amend'], shell=True, cwd=pathlib.Path(__file__).parent.parent.parent.parent.absolute())
+
+    def __update_dataset(self: Self) -> None: pass

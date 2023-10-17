@@ -1,5 +1,7 @@
 import sys
 import pathlib
+import csv
+from time import sleep
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
@@ -115,33 +117,30 @@ class HMI:
         message = self.text_box.get()
         if not message:
             return
+        self.__user_input = message
         self.text_box.delete(0, tk.END)
-        self.text_area.configure(state=tk.NORMAL)
-        self.text_area.insert(tk.END, "You: " + message + '\n\n')
-        while answer := self.answer_to(message) == self.__answer:
-            continue
-        self.__answer = self.answer_to(message)
-
-        #! command execution part of the code
-        if '@shell' in answer:
-            command = answer.split('@shell ')[1].split('/@shell')[0]
-            cmd_ret = self.__proc.send(command)
-        # elif '@code' in answer:
-        #    answer.split('@code ')[1].split('/@code')[0]
-        #    ...
-
-        #! change this so the formatting of commands are properly dealt with
-        self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + self.__answer + '\n\n')
         
-        self.text_area.configure(state=tk.DISABLED)
+        self.__send(message, event)
+        # while answer := self.answer_to(message) == self.__answer:
+        #     continue
+        # self.__answer = self.answer_to(message)
 
-    def approved(self: Self, event=None) -> None:
-        '''
-            This method is called when the like button is hit, triggering a change in the training dataset of the bot.
+        # #! command execution part of the code
+        # if '@shell' in answer:
+        #     command = answer.split('@shell ')[1].split('/@shell')[0]
+        #     cmd_ret = self.__proc.send(command)        
 
-            Args:
-                event (tk.Event): The event that triggered the method.
-        '''
+        # #! change this so the formatting of commands are properly dealt with
+        # self.text_area.configure(state=tk.NORMAL)
+        # self.text_area.insert(tk.END, "You: " + message + '\n\n')
+        # self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
+        # for element in self.__answer:
+        #     if element == '@cmd' or element == '/@cmd':
+        #         self.text_area.insert(tk.END, '\n' * 2)
+        #     self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + element + " ")
+        #     sleep(0.05)
+        # self.text_area.insert(tk.END, "\n" * 2)
+        # self.text_area.configure(state=tk.DISABLED)
 
     def regenerate_response(self: Self, event=None) -> None:
         '''
@@ -150,6 +149,43 @@ class HMI:
             Args:
                 event (tk.Event): The event that triggered the method.
         '''
+        self.__send(self.__user_input, event)
+
+    def __send(self: Self, message: str, event=None) -> None:
+        '''
+        '''
+        while answer := self.answer_to(message) == self.__answer:
+            continue
+        self.__answer = self.answer_to(message)
+
+        #! command execution part of the code
+        if '@shell' in answer:
+            command = answer.split('@shell ')[1].split('/@shell')[0]
+            cmd_ret = self.__proc.send(command)        
+
+        #! change this so the formatting of commands are properly dealt with
+        self.text_area.configure(state=tk.NORMAL)
+        self.text_area.insert(tk.END, "You: " + message + '\n\n')
+        self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
+        for element in self.__answer:
+            if element == '@cmd' or element == '/@cmd':
+                self.text_area.insert(tk.END, '\n' * 2)
+            self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + element + " ")
+            sleep(0.05)
+        self.text_area.insert(tk.END, "\n" * 2)
+        self.text_area.configure(state=tk.DISABLED)
+
+
+    def approved(self: Self, event=None) -> None:
+        '''
+            This method is called when the like button is hit, triggering a change in the training dataset of the bot.
+
+            Args:
+                event (tk.Event): The event that triggered the method.
+        '''
+        with (pathlib.Path(__file__).parent.parent.parent.parent / 'datasets' / 'approved.csv').open('a') as dataset:
+            csv.writer(dataset).writerow([self.__user_input, self.__answer])
+        self.model.check_db_change()
 
     def answer_to(self: Self, message: str) -> str:
         '''
@@ -162,5 +198,4 @@ class HMI:
         # answer: str = self.model.predict(message)
         # if answer.startswith("@command: "):
         #     answer = self.__mcs.send(answer[10:])
-        self.model.check_db_change()
         return self.model.predict(message)
