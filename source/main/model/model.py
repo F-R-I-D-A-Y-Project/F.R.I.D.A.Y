@@ -10,6 +10,8 @@ import subprocess
 from typing import Self
 warnings.simplefilter("ignore")
 
+class UntrainedModelError(Exception):
+    pass
 
 
 class Model:
@@ -64,11 +66,12 @@ class Model:
 
         self.__model = None # Transformer(512, 10000, 10000, 100).to(self.__device)
 
-        for epoch in range(epochs):
-            self.__model.train()
-            ...
-        if verbose:
-            print(self.__model.parameters())
+        # for epoch in range(epochs):
+        #     self.__model.train()
+        #     ...
+        #     self.__model.eval()
+        if verbose: pass
+            # print('\n',self.__model.parameters())
         
         self.__serialize_model()
 
@@ -81,8 +84,9 @@ class Model:
                 message (str): message to be answered by the chatbot
 
         '''
-        trg = None #?
-        return self.__model.decode(message, trg)
+        if not hasattr(self, '_Model__model'):
+            raise UntrainedModelError("Model not trained yet. Use 'fit()' method to train it.")
+        return 'self.__model.decode(message, trg)'
 
     __call__ = predict
     

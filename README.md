@@ -18,17 +18,27 @@ it is serialized so the model doesn't need to be trained every time
 
 F.R.I.D.A.Y is compatible with Python 3.10+
 
-### Frameworks used
+### Packages used
 
-- [Pexpect](https://pexpect.readthedocs.io/en/stable/)
-- [Pytorch](https://pytorch.org/docs/stable/index.html)
-- [Platform](https://docs.python.org/3/library/platform.html)
-- [TKinter](https://docs.python.org/3/library/tkinter.html)
-- [Subprocess](https://docs.python.org/3/library/subprocess.html)
-- [Pathlib](https://docs.python.org/3/library/pathlib.html)
-- [Csv](https://docs.python.org/3/library/csv.html)
-- [Pickle](https://docs.python.org/3/library/pickle.html)
-- [Torchtext](https://pytorch.org/text/stable/index.html)
+### Shell interaction
+- [pexpect](https://pexpect.readthedocs.io/en/stable/)
+- [platform](https://docs.python.org/3/library/platform.html)
+### Model creation
+- [pytorch](https://pytorch.org/docs/stable/index.html)
+- [torchtext](https://pytorch.org/text/stable/index.html)
+- [tiktoken](https://github.com/openai/tiktoken)
+### Documentation
+- [sphinx](https://www.sphinx-doc.org/en/master/)
+### GUI
+- [tkinter](https://docs.python.org/3/library/tkinter.html)
+### STL
+- [subprocess](https://docs.python.org/3/library/subprocess.html)
+- [sys](https://docs.python.org/3/library/sys.html)
+- [time](https://docs.python.org/3/library/time.html)
+- [pathlib](https://docs.python.org/3/library/pathlib.html)
+- [csv](https://docs.python.org/3/library/csv.html)
+- [pickle](https://docs.python.org/3/library/pickle.html)
+
 
 ## How to use
 To create and activate the Python virtual environment, use:

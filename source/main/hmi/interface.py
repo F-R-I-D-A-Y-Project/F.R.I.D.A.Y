@@ -154,7 +154,7 @@ class HMI:
     def __send(self: Self, message: str, event=None) -> None:
         '''
         '''
-        while answer := self.answer_to(message) == self.__answer:
+        while (answer := self.answer_to(message)) == self.__answer:
             continue
         self.__answer = self.answer_to(message)
 
@@ -168,9 +168,10 @@ class HMI:
         self.text_area.insert(tk.END, "You: " + message + '\n\n')
         self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
         for element in self.__answer:
-            if element == '@cmd' or element == '/@cmd':
+            if element == '@code' or element == '/@code':
                 self.text_area.insert(tk.END, '\n' * 2)
-            self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + element + " ")
+            self.text_area.insert(tk.END, element)
+            #! solve the flushing problem and uncomment the line below
             sleep(0.05)
         self.text_area.insert(tk.END, "\n" * 2)
         self.text_area.configure(state=tk.DISABLED)
