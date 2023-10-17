@@ -121,26 +121,6 @@ class HMI:
         self.text_box.delete(0, tk.END)
         
         self.__send(message, event)
-        # while answer := self.answer_to(message) == self.__answer:
-        #     continue
-        # self.__answer = self.answer_to(message)
-
-        # #! command execution part of the code
-        # if '@shell' in answer:
-        #     command = answer.split('@shell ')[1].split('/@shell')[0]
-        #     cmd_ret = self.__proc.send(command)        
-
-        # #! change this so the formatting of commands are properly dealt with
-        # self.text_area.configure(state=tk.NORMAL)
-        # self.text_area.insert(tk.END, "You: " + message + '\n\n')
-        # self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
-        # for element in self.__answer:
-        #     if element == '@cmd' or element == '/@cmd':
-        #         self.text_area.insert(tk.END, '\n' * 2)
-        #     self.text_area.insert(tk.END, "F.R.I.D.A.Y: " + element + " ")
-        #     sleep(0.05)
-        # self.text_area.insert(tk.END, "\n" * 2)
-        # self.text_area.configure(state=tk.DISABLED)
 
     def regenerate_response(self: Self, event=None) -> None:
         '''

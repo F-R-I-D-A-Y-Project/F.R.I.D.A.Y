@@ -18,7 +18,13 @@ class Model:
     '''
         This class is responsible for the NLP model of the chatbot.
     '''
-    def __init__(self: Self, path_to_dataset: str) -> None:
+    def __init__(self: Self, path_to_dataset: str,
+                 batch_size: int=32,
+                 block_size: int=8,
+                 max_iters: int=3000,
+                 eval_interval: int=300,
+                 learning_rate: float=1e-2,
+                 eval_iters: int=200) -> None:
         '''
             Constructor of the class. It receives the path to the dataset, but does not train the model.
             
@@ -27,6 +33,75 @@ class Model:
         '''
         self.__dataset = path_to_dataset
         self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.__batch_size = batch_size
+        self.__block_size = block_size
+        self.__max_iters = max_iters
+        self.__eval_interval = eval_interval
+        self.__learning_rate = learning_rate
+        self.__eval_iters = eval_iters
+
+    @property
+    def dataset(self: Self) -> str:
+        '''
+            This property returns the path to the dataset.
+        '''
+        return self.__dataset
+    
+    @property
+    def device(self: Self) -> torch.device:
+        '''
+            This property returns the device used for training the model.
+        '''
+        return self.__device
+    
+    @property
+    def batch_size(self: Self) -> int:
+        '''
+            This property returns the batch size used for training the model.
+        '''
+        return self.__batch_size
+    
+    @property
+    def block_size(self: Self) -> int:
+        '''
+            This property returns the block size used for training the model.
+        '''
+        return self.__block_size
+    
+    @property
+    def max_iters(self: Self) -> int:
+        '''
+            This property returns the maximum number of iterations used for training the model.
+        '''
+        return self.__max_iters
+    
+    @property
+    def eval_interval(self: Self) -> int:
+        '''
+            This property returns the evaluation interval used for training the model.
+        '''
+        return self.__eval_interval
+    
+    @property
+    def learning_rate(self: Self) -> float:
+        '''
+            This property returns the learning rate used for training the model.
+        '''
+        return self.__learning_rate
+    
+    @property
+    def eval_iters(self: Self) -> int:
+        '''
+            This property returns the evaluation iterations used for training the model.
+        '''
+        return self.__eval_iters
+    
+    @property
+    def model(self: Self):
+        '''
+            This property returns the model.
+        '''
+        return self.__model
 
     def fit(self: Self, path_to_dataset: str|None=None, *, epochs: int=100, verbose: bool=True) -> None:
         '''
