@@ -6,7 +6,7 @@ from time import sleep
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 from shell.process import Process
-from source.main.model.model import Model
+from model.model import Model
 import tkinter as tk
 from typing import Self
 

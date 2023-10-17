@@ -5,7 +5,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 from shell.process import Process
 from hmi.interface import HMI
-from source.main.model.model import Model
+from model.model import Model
 
 
 def main():

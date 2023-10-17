@@ -3,15 +3,29 @@ import torch
 import torch.nn.functional as F
 import torchtext
 import math
+import tiktoken
 import warnings
 import csv, pickle
 import pathlib
 import subprocess
+import sys
+import pathlib
 from typing import Self
+
+sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
+
+from model.dbreader import DBReader
+
 warnings.simplefilter("ignore")
 
 class UntrainedModelError(Exception):
     pass
+
+
+class Transformer(nn.Module):
+    def __init__(self: Self,
+                 device: torch.device) -> None:
+        super().__init__()
 
 
 class Model:
@@ -24,7 +38,8 @@ class Model:
                  max_iters: int=3000,
                  eval_interval: int=300,
                  learning_rate: float=1e-2,
-                 eval_iters: int=200) -> None:
+                 eval_iters: int=200,
+                 encoding: str='gpt2') -> None:
         '''
             Constructor of the class. It receives the path to the dataset, but does not train the model.
             
@@ -39,6 +54,11 @@ class Model:
         self.__eval_interval = eval_interval
         self.__learning_rate = learning_rate
         self.__eval_iters = eval_iters
+        self.__enc = None
+        try:
+            self.__enc = tiktoken.get_encoding(encoding)
+        except ValueError:
+            self.__enc = tiktoken.encoding_for_model(encoding)            
 
     @property
     def dataset(self: Self) -> str:
@@ -50,7 +70,7 @@ class Model:
     @property
     def device(self: Self) -> torch.device:
         '''
-            This property returns the device used for training the model.
+            This property returns the device used for the model.
         '''
         return self.__device
     
@@ -103,7 +123,10 @@ class Model:
         '''
         return self.__model
 
-    def fit(self: Self, path_to_dataset: str|None=None, *, epochs: int=100, verbose: bool=True) -> None:
+    def fit(self: Self, path_to_dataset: str|None=None, 
+            train_test_split: float=0.8, *, 
+            epochs: int=100, 
+            verbose: bool=True) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
@@ -139,14 +162,14 @@ class Model:
         with open(self.__dataset, 'r') as f:
             data = csv.reader(f)
 
-        self.__model = None # Transformer(512, 10000, 10000, 100).to(self.__device)
+        self.__model = Transformer(self.__device)
 
-        # for epoch in range(epochs):
-        #     self.__model.train()
-        #     ...
-        #     self.__model.eval()
-        if verbose: pass
-            # print('\n',self.__model.parameters())
+        for epoch in range(epochs):
+            self.__model.train()
+            ...
+            self.__model.eval()
+        if verbose: 
+            print('\n',self.__model.parameters())
         
         self.__serialize_model()
 
