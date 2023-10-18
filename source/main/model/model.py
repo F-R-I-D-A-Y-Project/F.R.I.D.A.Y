@@ -3,10 +3,9 @@ import torch
 import torch.nn.functional as F
 import tiktoken
 import torchtext
-import math
 import tiktoken
 import warnings
-import csv, pickle
+import pickle
 import pathlib
 import subprocess
 import sys
@@ -134,8 +133,7 @@ class Model:
         return self.__enc
     
 
-    def fit(self: Self, path_to_dataset: str|None=None, 
-            train_test_split: float=0.8, *, 
+    def fit(self: Self, train_test_split: float=0.8, *, 
             epochs: int=100, 
             verbose: bool=True) -> None:
         '''
@@ -148,14 +146,11 @@ class Model:
             Args:
                 path_to_dataset (str): path to dataset used for training
         '''
-        if path_to_dataset:
-            self.__dataset = path_to_dataset
-
         if (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').exists():
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
         else:
-            self.__train(epochs, verbose)
+            self.__train(train_test_split, epochs, verbose)
 
     def __serialize_model(self: Self) -> None:
         '''
@@ -165,12 +160,14 @@ class Model:
         with (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').open('wb') as f:
             pickle.dump(self.__model, f)
 
-    def __train(self: Self, epochs: int, verbose: bool) -> None:
+    def __train(self: Self, train_test_split: float, epochs: int, verbose: bool) -> None:
         '''
             Training algorithm of the Tranformers model
         '''
 
         self.__model = Transformer(self.__device)
+
+        # self.dataset.split().collect()
 
         for epoch in range(epochs):
             self.model.train()

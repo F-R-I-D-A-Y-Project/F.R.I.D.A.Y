@@ -107,7 +107,7 @@ class HMI:
         '''
         self.gui.mainloop()
 
-    def send(self: Self, event=None) -> None:
+    def send(self: Self, event: tk.Event|None=None) -> None:
         '''
             This method sends a message to the chatbot.
 
@@ -122,7 +122,7 @@ class HMI:
         
         self.__send(message, event)
 
-    def regenerate_response(self: Self, event=None) -> None:
+    def regenerate_response(self: Self, event: tk.Event|None=None) -> None:
         '''
             This method is called when the regenerate button is hit, resending the previous prompt to the bot.
 
@@ -131,8 +131,9 @@ class HMI:
         '''
         self.__send(self.__user_input, event)
 
-    def __send(self: Self, message: str, event=None) -> None:
+    def __send(self: Self, message: str, event: tk.Event|None=None) -> None:
         '''
+
         '''
         while (answer := self.answer_to(message)) == self.__answer:
             continue
@@ -152,12 +153,12 @@ class HMI:
                 self.text_area.insert(tk.END, '\n' * 2)
             self.text_area.insert(tk.END, element)
             #! solve the flushing problem and uncomment the line below
-            sleep(0.05)
+            # sleep(0.05)
         self.text_area.insert(tk.END, "\n" * 2)
         self.text_area.configure(state=tk.DISABLED)
 
 
-    def approved(self: Self, event=None) -> None:
+    def approved(self: Self, event: tk.Event|None=None) -> None:
         '''
             This method is called when the like button is hit, triggering a change in the training dataset of the bot.
 
@@ -175,8 +176,4 @@ class HMI:
             Args:
                 message (str): The message to which the chatbot will answer.
         '''
-
-        # answer: str = self.model.predict(message)
-        # if answer.startswith("@command: "):
-        #     answer = self.__mcs.send(answer[10:])
         return self.model.predict(message)
