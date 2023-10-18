@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+from torch.optim import Adam, Optimizer
 import torch.nn.functional as F
 import tiktoken
 import torchtext
@@ -26,6 +27,8 @@ class Transformer(nn.Module):
     def __init__(self: Self,
                  device: torch.device) -> None:
         super().__init__()
+
+    def forward(self, idx, tgt=None): pass
 
 
 class Model:
@@ -135,7 +138,8 @@ class Model:
 
     def fit(self: Self, train_test_split: float=0.8, *, 
             epochs: int=100, 
-            verbose: bool=True) -> None:
+            verbose: bool=True,
+            optimizer: Optimizer=Adam) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
@@ -150,7 +154,7 @@ class Model:
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
         else:
-            self.__train(train_test_split, epochs, verbose)
+            self.__train(train_test_split, epochs, verbose, optimizer)
 
     def __serialize_model(self: Self) -> None:
         '''
@@ -160,28 +164,30 @@ class Model:
         with (pathlib.Path(__file__).parent.parent.parent.parent / 'model.pkl').open('wb') as f:
             pickle.dump(self.__model, f)
 
-    def __train(self: Self, train_test_split: float, epochs: int, verbose: bool) -> None:
+    def __train(self: Self, train_test_split: float, epochs: int, verbose: bool, optimizer: Optimizer) -> None:
         '''
             Training algorithm of the Tranformers model
         '''
 
         self.__model = Transformer(self.__device)
 
-        # self.dataset.split().collect()
+        # self.dataset.split()
 
         for epoch in range(epochs):
+            if verbose:
+                print(f'Epoch {epoch+1}/{epochs}')
             self.model.train()
-            self.__train_epoch()
+            loss, _ = self.__train_epoch(optimizer)
             self.model.eval()
             
-            if verbose: pass # print loss for each epoch
+            if verbose: pass # print loss for each epoch and closing words for an epoch
 
         if verbose: 
             print('\n',*self.model.parameters())
         
         self.__serialize_model()
 
-    def __train_epoch(self: Self) -> None:
+    def __train_epoch(self: Self, optimizer: Optimizer) -> None:
         '''
             Training epoch of the Tranformers model
         '''

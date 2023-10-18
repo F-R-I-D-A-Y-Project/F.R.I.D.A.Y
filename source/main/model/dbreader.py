@@ -1,15 +1,6 @@
 import pathlib
 from typing import Self, Callable
-
-
-class DBIterator:
-    def __init__(self: Self, operation: Callable, *args, **kwargs) -> None:
-        self.__operation = operation
-        self.__args = args
-        self.__kwargs = kwargs    
-
-    def collect(self): 
-        return self.__operation(*self.__args, **self.__kwargs)
+from torch.utils.data import Dataset, DataLoader
 
 
 class DBManager:
@@ -26,12 +17,6 @@ class DBManager:
         return self.__dataset_path
     
     def split(self: Self, train_size: float=0.8) -> None:
-        '''
-            This method splits the dataset into train, test and validation sets.
-        '''
-        return DBIterator(self.__split, train_size)
-    
-    def __split(self, train_size):
         '''
             This method splits the dataset into train, test and validation sets.
         '''

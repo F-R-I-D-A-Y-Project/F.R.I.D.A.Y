@@ -1,4 +1,4 @@
-import argparse, subprocess, pathlib, os
+import argparse, subprocess, pathlib
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -8,7 +8,7 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
     if args.args[0] == 'run':
-        path = pathlib.Path('.') / 'source' / 'main' / 'main' / 'main.py'
+        path = pathlib.Path('.') / 'source' / 'main' / '__main__.py'
         subprocess.run(f'python {path.absolute()}', shell=True)
 
 if __name__ == '__main__':
