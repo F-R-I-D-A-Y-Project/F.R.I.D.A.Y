@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from torch.optim import Adam, Optimizer
+from torch.optim import AdamW, Optimizer
 import torch.nn.functional as F
 import tiktoken
 import torchtext
@@ -23,12 +23,17 @@ class UntrainedModelError(Exception):
     pass
 
 
+class PositionalEmbedding(nn.Embedding): ...
+class Encoder(nn.Module): ...
+class Decoder(nn.Module): ...
+
+
 class Transformer(nn.Module):
     def __init__(self: Self,
                  device: torch.device) -> None:
         super().__init__()
 
-    def forward(self, idx, tgt=None): pass
+    def forward(self, idx, trg=None): ...
 
 
 class Model:
@@ -38,8 +43,7 @@ class Model:
     def __init__(self: Self, path_to_dataset: str,
                  batch_size: int=32,
                  block_size: int=8,
-                 max_iters: int=3000,
-                 eval_interval: int=300,
+                 per_epoch_iter: int=300,
                  learning_rate: float=1e-2,
                  eval_iters: int=200,
                  encoding: str='gpt2') -> None:
@@ -52,8 +56,7 @@ class Model:
         self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.__batch_size = batch_size
         self.__block_size = block_size
-        self.__max_iters = max_iters
-        self.__eval_interval = eval_interval
+        self.__per_epoch_iter = per_epoch_iter
         self.__learning_rate = learning_rate
         self.__eval_iters = eval_iters
         
@@ -63,7 +66,7 @@ class Model:
         except ValueError:
             self.__enc = tiktoken.encoding_for_model(encoding)            
         
-        self.__dataset = DBManager(pathlib.Path(path_to_dataset))
+        self.__dataset = DBManager(pathlib.Path(path_to_dataset), encoder=self.__enc)
 
     @property
     def dataset(self: Self) -> DBManager:
@@ -86,6 +89,13 @@ class Model:
         '''
         return self.__batch_size
     
+    @batch_size.setter
+    def batch_size(self: Self, value: int) -> None:
+        '''
+            This property sets the batch size used for training the model.
+        '''
+        self.__batch_size = value
+    
     @property
     def block_size(self: Self) -> int:
         '''
@@ -93,19 +103,26 @@ class Model:
         '''
         return self.__block_size
     
+    @block_size.setter
+    def block_size(self: Self, value: int) -> None:
+        '''
+            This property sets the block size used for training the model.
+        '''
+        self.__block_size = value
+    
     @property
-    def max_iters(self: Self) -> int:
+    def per_epoch_iter(self: Self) -> int:
         '''
             This property returns the maximum number of iterations used for training the model.
         '''
-        return self.__max_iters
+        return self.__per_epoch_iter
     
-    @property
-    def eval_interval(self: Self) -> int:
+    @per_epoch_iter.setter
+    def per_epoch_iter(self: Self, value: int) -> None:
         '''
-            This property returns the evaluation interval used for training the model.
+            This property sets the maximum number of iterations used for training the model.
         '''
-        return self.__eval_interval
+        self.__per_epoch_iter = value
     
     @property
     def learning_rate(self: Self) -> float:
@@ -113,6 +130,13 @@ class Model:
             This property returns the learning rate used for training the model.
         '''
         return self.__learning_rate
+    
+    @learning_rate.setter
+    def learning_rate(self: Self, value: float) -> None:
+        '''
+            This property sets the learning rate used for training the model.
+        '''
+        self.__learning_rate = value
     
     @property
     def eval_iters(self: Self) -> int:
@@ -137,9 +161,9 @@ class Model:
     
 
     def fit(self: Self, train_test_split: float=0.8, *, 
-            epochs: int=100, 
+            epochs: int=3000, 
             verbose: bool=True,
-            optimizer: Optimizer=Adam) -> None:
+            optimizer: Optimizer|None=None) -> None:
         '''
             This method is responsible for training the model.
             It reads the dataset, captures the amount of unique words existent in the dataset, 
@@ -154,6 +178,8 @@ class Model:
             with open('model.pkl', 'rb') as f:
                 self.__model = pickle.load(f)
         else:
+            if optimizer == None:
+                optimizer = AdamW(self.model.parameters(), lr=self.learning_rate)
             self.__train(train_test_split, epochs, verbose, optimizer)
 
     def __serialize_model(self: Self) -> None:
@@ -166,32 +192,40 @@ class Model:
 
     def __train(self: Self, train_test_split: float, epochs: int, verbose: bool, optimizer: Optimizer) -> None:
         '''
-            Training algorithm of the Tranformers model
+            Training algorithm of the Transformers model
         '''
 
         self.__model = Transformer(self.__device)
 
-        # self.dataset.split()
+        X_train, Y_train, X_test, Y_test = self.dataset.split()
 
         for epoch in range(epochs):
             if verbose:
                 print(f'Epoch {epoch+1}/{epochs}')
             self.model.train()
-            loss, _ = self.__train_epoch(optimizer)
+            self.__train_epoch(optimizer, X_train, Y_train, verbose)
             self.model.eval()
             
-            if verbose: pass # print loss for each epoch and closing words for an epoch
+            # if verbose: pass # print loss for each epoch and closing words for an epoch
 
         if verbose: 
-            print('\n',*self.model.parameters())
+            print('\n',*self.model.parameters(),'\n'*2)
+            print('Model results: \n')
+            print()
         
         self.__serialize_model()
 
-    def __train_epoch(self: Self, optimizer: Optimizer) -> None:
+    def __train_epoch(self: Self, optimizer: Optimizer, X_train, Y_train, verbose: bool) -> None:
         '''
-            Training epoch of the Tranformers model
+            Training epoch of the Transformers model
         '''
-        pass
+        logits, loss = self.model(X_train, Y_train)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        if verbose:
+            print("loss for this epoch: %.4f" % loss.item())
 
     def predict(self: Self, message: str) -> str:
         '''
