@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
+import tiktoken
 import torchtext
 import math
 import tiktoken
@@ -14,7 +15,7 @@ from typing import Self
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
-from model.dbreader import DBReader
+from model.dbreader import DBManager
 
 warnings.simplefilter("ignore")
 
@@ -46,7 +47,6 @@ class Model:
             Args:
                 path_to_dataset (str): path to dataset used for training
         '''
-        self.__dataset = path_to_dataset
         self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.__batch_size = batch_size
         self.__block_size = block_size
@@ -54,14 +54,17 @@ class Model:
         self.__eval_interval = eval_interval
         self.__learning_rate = learning_rate
         self.__eval_iters = eval_iters
+        
         self.__enc = None
         try:
             self.__enc = tiktoken.get_encoding(encoding)
         except ValueError:
             self.__enc = tiktoken.encoding_for_model(encoding)            
+        
+        self.__dataset = DBManager(pathlib.Path(path_to_dataset))
 
     @property
-    def dataset(self: Self) -> str:
+    def dataset(self: Self) -> DBManager:
         '''
             This property returns the path to the dataset.
         '''
@@ -122,6 +125,14 @@ class Model:
             This property returns the model.
         '''
         return self.__model
+    
+    @property
+    def enc(self: Self):
+        '''
+            This property returns the encoding.
+        '''
+        return self.__enc
+    
 
     def fit(self: Self, path_to_dataset: str|None=None, 
             train_test_split: float=0.8, *, 
@@ -159,19 +170,25 @@ class Model:
             Training algorithm of the Tranformers model
         '''
 
-        with open(self.__dataset, 'r') as f:
-            data = csv.reader(f)
-
         self.__model = Transformer(self.__device)
 
         for epoch in range(epochs):
-            self.__model.train()
-            ...
-            self.__model.eval()
+            self.model.train()
+            self.__train_epoch()
+            self.model.eval()
+            
+            if verbose: pass # print loss for each epoch
+
         if verbose: 
-            print('\n',self.__model.parameters())
+            print('\n',*self.model.parameters())
         
         self.__serialize_model()
+
+    def __train_epoch(self: Self) -> None:
+        '''
+            Training epoch of the Tranformers model
+        '''
+        pass
 
     def predict(self: Self, message: str) -> str:
         '''
