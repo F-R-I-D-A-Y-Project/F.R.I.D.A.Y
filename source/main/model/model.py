@@ -2,9 +2,7 @@ import torch.nn as nn
 import torch
 from torch.optim import AdamW, Optimizer
 import torch.nn.functional as F
-import tiktoken
 import torchtext
-import tiktoken
 import warnings
 import pickle
 import pathlib
@@ -23,50 +21,155 @@ class UntrainedModelError(Exception):
     pass
 
 
-class PositionalEmbedding(nn.Embedding): ...
-class Encoder(nn.Module): ...
-class Decoder(nn.Module): ...
-
-
-class Transformer(nn.Module):
-    def __init__(self: Self,
-                 device: torch.device) -> None:
+class Head(nn.Module):
+    def __init__(self, head_size, n_embd, dropout, block_size):
         super().__init__()
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
+        self.value = nn.Linear(n_embd, head_size, bias=False)
+        self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
 
-    def forward(self, idx, trg=None): ...
+        self.dropout = nn.Dropout(dropout)
 
+    def forward(self, x):
+        B,T,C = x.shape
+        k = self.key(x)   
+        q = self.query(x) 
+        wei = q @ k.transpose(-2,-1) * k.shape[-1]**-0.5 
+        wei = wei.masked_fill(self.tril[:T, :T] == 0, float('-inf')) 
+        wei = F.softmax(wei, dim=-1) 
+        wei = self.dropout(wei)
+        v = self.value(x) 
+        out = wei @ v
+        return out
+    
+class MultiHeadAttention(nn.Module): ...
+
+class FeedForward(nn.Module):
+    def __init__(self, n_embd, intermediate_n_embd=4, dropout=0.2) -> None:
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, intermediate_n_embd * n_embd),
+            nn.ReLU(),
+            nn.Linear(intermediate_n_embd * n_embd, n_embd),
+            nn.Dropout(0.2)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+class Block(nn.Module):
+    def __init__(self: Self, n_embd, n_head) -> None:
+        super().__init__()
+        head_size = n_embd//n_head
+        self.ln1 = nn.LayerNorm(n_embd)
+        # self.att = MultiHeadAttention(n_head)
+        self.ffwd = FeedForward(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
+
+
+    def forward(self, x):
+        x+=self.att(self.ln1(x))
+        x+=self.ffwd(self.ln2(x))
+        return x
+    
+class Transformer(nn.Module): 
+    def __init__(self,vocab_size: int,
+                 n_embd: int,
+                 block_size: int,
+                 n_head: int,
+                 n_layer: int) -> None:
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.blocks = nn.Sequential(*[Block(n_embd, n_head=n_head) for _ in range(n_layer)])
+        self.ln_f = nn.LayerNorm(n_embd) # final layer norm
+        self.lm_head = nn.Linear(n_embd, vocab_size)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+
+    def forward(self, idx, target=None): ...
+
+    def generate(self, idx, max_new_tokens): ...
+
+# # hyperparameters
+# max_iters = 5000
 
 class Model:
     '''
         This class is responsible for the NLP model of the chatbot.
     '''
     def __init__(self: Self, path_to_dataset: str,
-                 batch_size: int=32,
-                 block_size: int=8,
-                 per_epoch_iter: int=300,
-                 learning_rate: float=1e-2,
+                 batch_size: int=64,
+                 block_size: int=256,
+                 per_epoch_iter: int=5000,
+                 learning_rate: float=3e-4,
                  eval_iters: int=200,
-                 encoding: str='gpt2') -> None:
+                 device: torch.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu'),
+                 dropout: float=0.2,
+                 n_layer: int=6,
+                 n_head: int=6,
+                 n_embd: int=384,
+                 eval_interval: int=500,) -> None:
         '''
             Constructor of the class. It receives the path to the dataset, but does not train the model.
             
             Args:
                 path_to_dataset (str): path to dataset used for training
         '''
-        self.__device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.__device = device
         self.__batch_size = batch_size
         self.__block_size = block_size
         self.__per_epoch_iter = per_epoch_iter
         self.__learning_rate = learning_rate
         self.__eval_iters = eval_iters
-        
-        self.__enc = None
-        try:
-            self.__enc = tiktoken.get_encoding(encoding)
-        except ValueError:
-            self.__enc = tiktoken.encoding_for_model(encoding)            
-        
-        self.__dataset = DBManager(pathlib.Path(path_to_dataset), encoder=self.__enc)
+        self.__dropout = dropout
+        self.__n_layer = n_layer
+        self.__n_head = n_head
+        self.__n_embd = n_embd
+        self.__eval_interval = eval_interval
+        self.__dataset = DBManager(pathlib.Path(path_to_dataset))
+
+    @property
+    def dropout(self: Self) -> float:
+        '''
+            This property returns the dropout used for training the model.
+        '''
+        return self.__dropout
+    
+    @property
+    def n_layer(self: Self) -> int:
+        '''
+            This property returns the number of layers used in the model.
+        '''
+        return self.__n_layer
+    
+    @property
+    def n_head(self: Self) -> int:
+        '''
+            This property returns the number of heads in the multihead attention mechanism
+        '''
+        return self.__n_head
+    
+    @property
+    def n_embd(self: Self) -> int:
+        '''
+            This property returns the embedding dimension.
+        '''
+        return self.__n_embd
+    
+    @property
+    def eval_interval(self: Self) -> int:
+        '''
+            This property returns the evaluation interval used for training the model.
+        '''
+        return self.__eval_interval
 
     @property
     def dataset(self: Self) -> DBManager:
@@ -152,13 +255,6 @@ class Model:
         '''
         return self.__model
     
-    @property
-    def enc(self: Self):
-        '''
-            This property returns the encoding.
-        '''
-        return self.__enc
-    
 
     def fit(self: Self, train_test_split: float=0.8, *, 
             epochs: int=3000, 
@@ -195,7 +291,12 @@ class Model:
             Training algorithm of the Transformers model
         '''
 
-        self.__model = Transformer(self.__device)
+        self.__model = Transformer(block_size=self.block_size,
+                                   n_embd=self.n_embd,
+                                   n_head=self.n_head,
+                                   n_layer=self.n_layer,
+                                   vocab_size=400, #!!!!!!!!
+                                   ).to(self.device)
 
         X_train, Y_train, X_test, Y_test = self.dataset.split()
 
@@ -206,10 +307,8 @@ class Model:
             self.__train_epoch(optimizer, X_train, Y_train, verbose)
             self.model.eval()
             
-            # if verbose: pass # print loss for each epoch and closing words for an epoch
-
         if verbose: 
-            print('\n',*self.model.parameters(),'\n'*2)
+            print('\n','==================================',*self.model.parameters(),'==================================','\n'*2, sep='\n')
             print('Model results: \n')
             print()
         
