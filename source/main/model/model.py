@@ -1,8 +1,14 @@
+"""
+    This code is based on Andrej Karpathy's video and orca from snap-stanford. Links:
+
+    - https://www.youtube.com/watch?v=kCc8FmEb1nY
+    - https://github.com/snap-stanford/orca 
+"""
+
 import torch.nn as nn
 import torch
 from torch.optim import AdamW, Optimizer
 import torch.nn.functional as F
-import torchtext
 import warnings
 import pickle
 import pathlib
@@ -43,7 +49,17 @@ class Head(nn.Module):
         out = wei @ v
         return out
     
-class MultiHeadAttention(nn.Module): ...
+class MultiHeadAttention(nn.Module): 
+    def __init__(self, n_heads, head_size, n_embd, drop=0.2) -> None:
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
+        self.projection = nn.Linear(n_heads * head_size, n_embd)
+        self.dropout = nn.Dropout(drop)
+
+    def forward(self, x):
+        x = torch.cat([h(x) for h in self.heads], dim=-1)
+        x = self.dropout(self.projection(x))
+        return x
 
 class FeedForward(nn.Module):
     def __init__(self, n_embd, intermediate_n_embd=4, dropout=0.2) -> None:
@@ -52,7 +68,7 @@ class FeedForward(nn.Module):
             nn.Linear(n_embd, intermediate_n_embd * n_embd),
             nn.ReLU(),
             nn.Linear(intermediate_n_embd * n_embd, n_embd),
-            nn.Dropout(0.2)
+            nn.Dropout(dropout)
         )
 
     def forward(self, x):
