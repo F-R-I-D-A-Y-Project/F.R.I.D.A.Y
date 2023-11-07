@@ -50,7 +50,7 @@ class Head(nn.Module):
         return out
     
 class MultiHeadAttention(nn.Module): 
-    def __init__(self, n_heads, head_size, n_embd, drop=0.2) -> None:
+    def __init__(self, n_heads, head_size, n_embd=384, drop=0.2) -> None:
         super().__init__()
         self.heads = nn.ModuleList([Head(head_size) for _ in range(n_heads)])
         self.projection = nn.Linear(n_heads * head_size, n_embd)
@@ -79,7 +79,7 @@ class Block(nn.Module):
         super().__init__()
         head_size = n_embd//n_head
         self.ln1 = nn.LayerNorm(n_embd)
-        # self.att = MultiHeadAttention(n_head)
+        self.att = MultiHeadAttention(n_head, head_size)
         self.ffwd = FeedForward(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
@@ -94,12 +94,14 @@ class Transformer(nn.Module):
                  n_embd: int,
                  block_size: int,
                  n_head: int,
-                 n_layer: int) -> None:
+                 n_layer: int,
+                 device: torch.device) -> None:
         super().__init__()
+        self.device = device
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head=n_head) for _ in range(n_layer)])
-        self.ln_f = nn.LayerNorm(n_embd) # final layer norm
+        self.ln_f = nn.LayerNorm(n_embd) 
         self.lm_head = nn.Linear(n_embd, vocab_size)
 
     def _init_weights(self, module):
@@ -110,12 +112,19 @@ class Transformer(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
-    def forward(self, idx, target=None): ...
+    def forward(self, idx): 
+        B, T = idx.shape
+        tok_emb = self.token_embedding_table(idx) # (B,T,C)
+        pos_emb = self.position_embedding_table(torch.arange(T, device=self.device)) # (T,C)
+        x = tok_emb + pos_emb # (B,T,C)
+        x = self.blocks(x) # (B,T,C)
+        x = self.ln_f(x) # (B,T,C)
+        logits = self.lm_head(x) # (B,T,vocab_size)
+        return logits
 
-    def generate(self, idx, max_new_tokens): ...
+    def generate(self, idx, max_new_tokens=300) -> torch.Tensor:
+        ...
 
-# # hyperparameters
-# max_iters = 5000
 
 class Model:
     '''
@@ -273,7 +282,7 @@ class Model:
     
 
     def fit(self: Self, train_test_split: float=0.8, *, 
-            epochs: int=3000, 
+            epochs: int=5000, 
             verbose: bool=True,
             optimizer: Optimizer|None=None) -> None:
         '''
@@ -311,22 +320,26 @@ class Model:
                                    n_embd=self.n_embd,
                                    n_head=self.n_head,
                                    n_layer=self.n_layer,
-                                   vocab_size=400, #!!!!!!!!
+                                   vocab_size=400, #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                                    ).to(self.device)
 
-        X_train, Y_train, X_test, Y_test = self.dataset.split()
+        while True:
+            X_train, Y_train, X_test, Y_test = self.dataset.split(train_test_split)
 
-        for epoch in range(epochs):
-            if verbose:
-                print(f'Epoch {epoch+1}/{epochs}')
-            self.model.train()
-            self.__train_epoch(optimizer, X_train, Y_train, verbose)
-            self.model.eval()
+            for epoch in range(epochs):
+                if verbose:
+                    print(f'Epoch {epoch+1}/{epochs}')
+                self.model.train()
+                self.__train_epoch(optimizer, X_train, Y_train, verbose)
+                self.model.eval()
             
+            if True: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                break             
+
         if verbose: 
             print('\n','==================================',*self.model.parameters(),'==================================','\n'*2, sep='\n')
             print('Model results: \n')
-            print()
+            # print()
         
         self.__serialize_model()
 
@@ -334,13 +347,21 @@ class Model:
         '''
             Training epoch of the Transformers model
         '''
-        logits, loss = self.model(X_train, Y_train)
+        logits = self.model(X_train)
+        loss = self.eval_loss(logits, Y_train)
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
 
         if verbose:
             print("loss for this epoch: %.4f" % loss.item())
+
+    def eval_loss(self: Self, logits, Y_train) -> torch.Tensor: 
+        B, T, C = logits.shape
+        logits = logits.view(B*T, C)
+        Y_train = Y_train.view(B*T)
+        loss = F.cross_entropy(logits, Y_train)
+        return loss
 
     def predict(self: Self, message: str) -> str:
         '''
@@ -353,7 +374,7 @@ class Model:
         '''
         if not hasattr(self, '_Model__model'):
             raise UntrainedModelError("Model not trained yet. Use 'fit()' method to train it.")
-        return 'self.__model.decode(message, trg)'
+        return self.decode(self.model.generate(message))
 
     __call__ = predict
     

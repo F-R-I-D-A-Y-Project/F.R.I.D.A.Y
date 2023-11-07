@@ -6,7 +6,7 @@ from time import sleep
 sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
 
 from shell.process import Process
-from model.model import Model
+from model.GPT import GPT
 import tkinter as tk
 from typing import Self
 
@@ -30,7 +30,7 @@ class HMI:
         This class is the GUI of the chatbot.
     '''
 
-    def __init__(self: Self, model: Model, proc: Process) -> None:
+    def __init__(self: Self, model: GPT, proc: Process) -> None:
         self.__model = model
         self.__proc = proc
         self.__answer = ''
@@ -138,25 +138,11 @@ class HMI:
         while (answer := self.answer_to(message)) == self.__answer:
             continue
         self.__answer = self.answer_to(message)
-
-        #! command execution part of the code
-        if '@shell' in answer:
-            command = answer.split('@shell ')[1].split('/@shell')[0]
-            cmd_ret = self.__proc.send(command)        
-
-        #! change this so the formatting of commands are properly dealt with
         self.text_area.configure(state=tk.NORMAL)
         self.text_area.insert(tk.END, "You: " + message + '\n\n')
         self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
-        for element in self.__answer:
-            if element == '@code' or element == '/@code':
-                self.text_area.insert(tk.END, '\n' * 2)
-            self.text_area.insert(tk.END, element)
-            #! solve the flushing problem and uncomment the line below
-            # sleep(0.05)
-        self.text_area.insert(tk.END, "\n" * 2)
+        self.text_area.insert(tk.END, self.__answer + ("\n" * 2))
         self.text_area.configure(state=tk.DISABLED)
-
 
     def approved(self: Self, event: tk.Event|None=None) -> None:
         '''
@@ -176,4 +162,4 @@ class HMI:
             Args:
                 message (str): The message to which the chatbot will answer.
         '''
-        return self.model.predict(message)
+        return self.model(message)
