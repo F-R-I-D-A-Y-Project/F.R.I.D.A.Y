@@ -1,12 +1,4 @@
-import sys
-import pathlib
-import csv
-from time import sleep
-
-sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
-
-from shell.process import Process
-from model.GPT import GPT
+from model import Model
 import tkinter as tk
 from typing import Self
 
@@ -30,9 +22,8 @@ class HMI:
         This class is the GUI of the chatbot.
     '''
 
-    def __init__(self: Self, model: GPT, proc: Process) -> None:
+    def __init__(self: Self, model: Model) -> None:
         self.__model = model
-        self.__proc = proc
         self.__answer = ''
         self.__gui = tk.Tk()
         self.initialize()
@@ -144,16 +135,6 @@ class HMI:
         self.text_area.insert(tk.END, self.__answer + ("\n" * 2))
         self.text_area.configure(state=tk.DISABLED)
 
-    def approved(self: Self, event: tk.Event|None=None) -> None:
-        '''
-            This method is called when the like button is hit, triggering a change in the training dataset of the bot.
-
-            Args:
-                event (tk.Event): The event that triggered the method.
-        '''
-        with (pathlib.Path(__file__).parent.parent.parent.parent / 'datasets' / 'approved.csv').open('a') as dataset:
-            csv.writer(dataset).writerow([self.__user_input, self.__answer])
-        self.model.check_db_change()
 
     def answer_to(self: Self, message: str) -> str:
         '''
