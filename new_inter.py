@@ -38,12 +38,12 @@ class HMI:
 
         self.frame = ctk.CTkFrame(self.gui, bg_color=BG_COLOR,
                              width=750, height=500, fg_color=GPT_TEXT_BOX)
-        self.text_widget = ctk.CTkTextbox(self.frame, width=750, height=450, bg_color=GPT_TEXT_BOX,
+        self.text_widget = ctk.CTkTextbox(self.frame, width=750, height=420, bg_color=GPT_TEXT_BOX,
                                   fg_color=GPT_TEXT_BOX, font=ctk.CTkFont(FONT, 14), state='disabled')
         self.text_widget.pack(padx=30)
         self.text_entry = ctk.CTkEntry(self.frame, width=700, bg_color=GPT_USER_INPUT,height=50, fg_color=GPT_LEFT_TAB, font=ctk.CTkFont(FONT, 14), placeholder_text="Ask anything to F.R.I.D.A.Y.")
         self.text_entry.bind("<Return>", lambda e: self.send())
-        self.text_entry.pack(padx=30)
+        self.text_entry.pack(padx=30, pady=30)
         self.frame.pack()
 
     def send(self):
