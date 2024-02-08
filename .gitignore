@@ -1,4 +1,6 @@
 env
 **__pycache__
 .vscode
-**friday_model
+model
+friday_model
+output

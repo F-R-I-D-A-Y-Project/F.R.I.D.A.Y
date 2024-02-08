@@ -1,14 +1,12 @@
-import sys
-import pathlib
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent.absolute()))
-
-from interface import HMI
+from new_inter import HMI
 from model import Model
 
 
 def main():
-    model = Model('friday_model', 'friday_model_tokenizer')
+    model = Model('friday_model')
     hmi = HMI(model)
     try:
         hmi.run()

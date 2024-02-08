@@ -7,10 +7,10 @@ class Model:
         This class is responsible for the NLP model of the chatbot.
     '''
 
-    def __init__(self: Self, path_to_model: str, path_to_tokenizer) -> None:
+    def __init__(self: Self, path_to_model: str, path_to_tokenizer: str|None=None, maxlen: int=100) -> None:
         self.__model = AutoModelForCausalLM.from_pretrained(path_to_model)
-        self.__tokenizer = AutoTokenizer.from_pretrained(path_to_tokenizer)
-        self.__pipe = pipeline('text-generation', model=self.__model, tokenizer=self.__tokenizer, max_length=100)
+        self.__tokenizer = AutoTokenizer.from_pretrained(path_to_tokenizer or path_to_model)
+        self.__pipe = pipeline('text-generation', model=self.__model, tokenizer=self.__tokenizer, max_length=maxlen)
 
     @property
     def model(self: Self):
