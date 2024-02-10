@@ -1,16 +1,15 @@
+import customtkinter as ctk
 from model import Model
-import tkinter as tk
-from typing import Self
 
 
 BG_GRAY = "#ABB2B9"
 BG_COLOR = "#17202A"
 TEXT_COLOR = "#EAECEE"
 
-GPT_LEFT_TAB = "#202123" 
-GPT_BOT_ANSWER = "#343541" 
-GPT_USER_INPUT = "#444654" 
-GPT_TEXT_BOX = "#40414F" 
+GPT_LEFT_TAB = "#202123"
+GPT_BOT_ANSWER = "#343541"
+GPT_USER_INPUT = "#444654"
+GPT_TEXT_BOX = "#40414F"
 
 
 FONT = "Helvetica 14"
@@ -18,128 +17,61 @@ FONT_BOLD = "Helvetica 13 bold"
 
 
 class HMI:
-    '''
-        This class is the GUI of the chatbot.
-    '''
 
-    def __init__(self: Self, model: Model) -> None:
+    def __init__(self, model: Model) -> None:
         self.__model = model
         self.__answer = ''
-        self.__gui = tk.Tk()
+        self.__gui = ctk.CTk()
         self.initialize()
 
-    @property
-    def model(self: Self):
-        '''
-            This property returns the model.
-        '''
-        return self.__model
+    model, gui = property(lambda self: self.__model), property(
+        lambda self: self.__gui)
 
-    @property
-    def gui(self: Self):
-        '''
-            This property returns the GUI.
-        '''
-        return self.__gui
-
-    def initialize(self: Self):
-        '''
-            This method initializes the GUI.
-        '''
+    def initialize(self):
+        self.gui.geometry("750x550")
         self.gui.title("Chat")
-        self.gui.resizable(width=True, height=True)
-        self.gui.configure(width=470, height=550, bg=BG_COLOR)
+        self.gui.resizable(width=False, height=False)
+        ctk.set_default_color_theme("dark-blue")
+        title_label = ctk.CTkLabel(
+            self.gui, text="F.R.I.D.A.Y.", font=ctk.CTkFont(FONT_BOLD, size=30, weight='bold'))
+        title_label.pack(pady=10, padx=10)
 
-        # head label
-        head_label = tk.Label(self.gui, bg=BG_COLOR, fg=TEXT_COLOR,
-                              text="F.R.I.D.A.Y.", font=FONT_BOLD, pady=10)
-        head_label.place(relwidth=1)
+        self.frame = ctk.CTkFrame(self.gui, bg_color=BG_COLOR,
+                             width=750, height=500, fg_color=GPT_TEXT_BOX)
+        self.text_widget = ctk.CTkTextbox(self.frame, width=750, height=420, bg_color=GPT_TEXT_BOX,
+                                  fg_color=GPT_TEXT_BOX, font=ctk.CTkFont(FONT, 16), state='disabled')
+        
+        self.text_widget.configure(state="normal")
+        self.text_widget.insert(
+            ctk.END, "F.R.I.D.A.Y.: Hello there! How can I help you?" + '\n')
+        self.text_widget.configure(state="disabled")
 
-        # tiny divider
-        line = tk.Label(self.gui, width=450, bg=BG_GRAY)
-        line.place(relwidth=1, rely=0.07, relheight=0.012)
+        self.scroll = ctk.CTkScrollbar(self.frame, command=self.text_widget.yview)
+        
+        self.text_widget.pack(padx=30)
+        self.text_entry = ctk.CTkEntry(self.frame, width=700, bg_color=GPT_USER_INPUT,height=50, fg_color=GPT_LEFT_TAB, font=ctk.CTkFont(FONT, 14), placeholder_text="Ask anything to F.R.I.D.A.Y.")
+        self.text_entry.bind("<Return>", lambda e: self.send())
+        self.text_entry.pack(padx=30, pady=15)
+        self.frame.pack()
 
-        # text widget
-        self.text_area = tk.Text(self.gui, width=20, height=2,
-                                 bg=BG_COLOR, fg=TEXT_COLOR, font=FONT, padx=5, pady=5)
-        self.text_area.place(relheight=0.745, relwidth=1, rely=0.08)
-        self.text_area.configure(cursor="arrow", state=tk.DISABLED)
+    def send(self):
+        msg = self.text_entry.get()
+        self.text_entry.delete(0, ctk.END)
 
-        # scroll bar
-        scrollbar = tk.Scrollbar(self.text_area)
-        scrollbar.place(relheight=1, relx=0.974)
-        scrollbar.configure(command=self.text_area.yview)
+        if msg != '':
+            self.text_widget.configure(state="normal")
+            self.text_widget.insert(ctk.END, "You: " + msg + '\n')
+            self.text_widget.configure(state="disabled")
 
-        # bottom label
-        bottom_label = tk.Label(self.gui, bg=BG_GRAY, height=80)
-        bottom_label.place(relwidth=1, rely=0.825)
+            self.answer = self.model(msg)
+            self.text_widget.configure(state="normal")
+            self.text_widget.insert(
+                ctk.END, "F.R.I.D.A.Y.: " + self.answer + '\n')
+            self.text_widget.configure(state="disabled")
 
-        # message box
-        bottom_label2 = tk.Label(bottom_label, bg=BG_COLOR, height=80)
-        bottom_label2.place(relwidth=0.74 + 0.24,
-                            relheight=0.06, rely=0.008, relx=0.011)
+            self.text_widget.see(ctk.END)
 
-        # message entry box
-        self.text_box = tk.Entry(bottom_label2, bg=BG_COLOR, fg=TEXT_COLOR,
-                                 font=FONT, relief=tk.FLAT, highlightthickness=0, borderwidth=0)
-        self.text_box.place(relwidth=0.9, relheight=1, rely=0, relx=0)
-        self.text_box.focus()
-        self.text_box.bind("<Return>", self.send)
-
-        # send button
-        self.__button = tk.Button(bottom_label2, text="Send", font=FONT_BOLD, width=16, bg=BG_GRAY,
-                                  command=self.send, relief=tk.FLAT)
-        self.__button.place(relx=0.9, rely=0.2, relheight=0.6, relwidth=0.1)
-
-    def run(self) -> None:
-        '''
-            This method runs the GUI.
-        '''
+    def run(self):
         self.gui.mainloop()
 
-    def send(self: Self, event: tk.Event|None=None) -> None:
-        '''
-            This method sends a message to the chatbot.
 
-            Args:
-                event (tk.Event): The event that triggered the method.
-        '''
-        message = self.text_box.get()
-        if not message:
-            return
-        self.__user_input = message
-        self.text_box.delete(0, tk.END)
-        
-        self.__send(message, event)
-
-    def regenerate_response(self: Self, event: tk.Event|None=None) -> None:
-        '''
-            This method is called when the regenerate button is hit, resending the previous prompt to the bot.
-
-            Args:
-                event (tk.Event): The event that triggered the method.
-        '''
-        self.__send(self.__user_input, event)
-
-    def __send(self: Self, message: str, event: tk.Event|None=None) -> None:
-        '''
-
-        '''
-        while (answer := self.answer_to(message)) == self.__answer:
-            continue
-        self.__answer = self.answer_to(message)
-        self.text_area.configure(state=tk.NORMAL)
-        self.text_area.insert(tk.END, "You: " + message + '\n\n')
-        self.text_area.insert(tk.END, "F.R.I.D.A.Y: ")
-        self.text_area.insert(tk.END, self.__answer + ("\n" * 2))
-        self.text_area.configure(state=tk.DISABLED)
-
-
-    def answer_to(self: Self, message: str) -> str:
-        '''
-            This method returns the answer of the chatbot to a message.
-
-            Args:
-                message (str): The message to which the chatbot will answer.
-        '''
-        return self.model(message)

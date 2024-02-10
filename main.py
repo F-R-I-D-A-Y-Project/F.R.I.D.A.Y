@@ -1,7 +1,7 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from new_inter import HMI
+from interface import HMI
 from model import Model
 
 

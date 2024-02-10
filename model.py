@@ -1,5 +1,9 @@
 from typing import Self
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+import pathlib
+import subprocess
+import logging
+import time
 
 
 class Model:
@@ -8,6 +12,10 @@ class Model:
     '''
 
     def __init__(self: Self, path_to_model: str, path_to_tokenizer: str|None=None, maxlen: int=100) -> None:
+        if not pathlib.Path(path_to_model).exists():
+            logging.warning('Model not found. Generating model...')
+            time.sleep(1)
+            subprocess.run('python model_gen.py', shell=True, check=True)
         self.__model = AutoModelForCausalLM.from_pretrained(path_to_model)
         self.__tokenizer = AutoTokenizer.from_pretrained(path_to_tokenizer or path_to_model)
         self.__pipe = pipeline('text-generation', model=self.__model, tokenizer=self.__tokenizer, max_length=maxlen)
