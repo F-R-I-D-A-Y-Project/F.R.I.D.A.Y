@@ -5,8 +5,7 @@ Python project developed for the discipline "Laboratório de Programação 2", a
 
 ## About 
 
-F.R.I.D.A.Y is a chatbot and personal assistant AI developed in Python. Capable of answering question made by user and executing shell commands for the user. It was developed using the Transformers architecture, and 
-it is serialized so the model doesn't need to be trained every time
+F.R.I.D.A.Y is a chatbot and personal assistant AI developed in Python, capable of answering question made by user. The model is a fine-tuned version of the GPT2-large pretrained model, trained with the dataset "truthful_qa", by ########. The fine-tuning was made using QLoRA technique, to reduce the necessary computational power.
 
 ## Team members
 
@@ -16,54 +15,41 @@ it is serialized so the model doesn't need to be trained every time
 
 ## Compatibility
 
-F.R.I.D.A.Y is compatible with Python 3.10+
-
-### Packages used
-
-### Shell interaction
-- [pexpect](https://pexpect.readthedocs.io/en/stable/)
-- [platform](https://docs.python.org/3/library/platform.html)
-### Model creation
-- [pytorch](https://pytorch.org/docs/stable/index.html)
-- [torchtext](https://pytorch.org/text/stable/index.html)
-- [tiktoken](https://github.com/openai/tiktoken)
-### Documentation
-- [sphinx](https://www.sphinx-doc.org/en/master/)
-### GUI
-- [tkinter](https://docs.python.org/3/library/tkinter.html)
-### STL
-- [subprocess](https://docs.python.org/3/library/subprocess.html)
-- [sys](https://docs.python.org/3/library/sys.html)
-- [time](https://docs.python.org/3/library/time.html)
-- [pathlib](https://docs.python.org/3/library/pathlib.html)
-- [csv](https://docs.python.org/3/library/csv.html)
-- [pickle](https://docs.python.org/3/library/pickle.html)
-
+F.R.I.D.A.Y is compatible with Python 3.11+
 
 ## How to use
 To create and activate the Python virtual environment, use:
 
 - On Linux:
-
-``` sh
-source init_venv.sh
-activate_venv
+```shell
+    python -m venv env
+    source env/bin/activate
+    pip install -r requirements.txt
 ```
-
 - On Windows:
-``` ps1
-. .\init_venv.ps1
-InitVenv
+```shell
+    python -m venv env
+    .\env\Scripts\activate
+    pip install -r requirements.txt
 ```
 
-Then, all you have to do is run :
-
-``` sh
-friday run
+Once the installation is complete, run:
+```shell
+python main.py
 ```
 
-on your terminal after executing ``` source init_venv.sh``` (or ``` . .\init_venv.ps1```)
+## About QLoRA
 
-## Documentation
+Quantized Low-Rank Adaptation (QLoRA) is a fine-tuning technique that proposes a way of reducing the computation power and data amount required to fine-tune an LLM. QLoRA offers several benefits in the NLP area, such as reducing significantly the training time and the memory usage while maintaining a good performance. This is how it works:
 
-The documentation can be found [here](https://github.com/F-R-I-D-A-Y-Project/F.R.I.D.A.Y-Python/docs)
+- Quantization: QLoRA reduces the precision of the weights in the pre-trained LLM from 32-bit to 4-bit (or even lower). This significantly reduces the memory footprint and allows for faster computations.
+- Low-rank adapters: Instead of modifying all the parameters, QLoRA introduces a small set of learnable "adapters" that capture the specific adjustments needed for fine-tuning. These adapters have a "low-rank" structure, meaning they use fewer parameters than the original LLM, further improving efficiency.
+- Fine-tuning: During fine-tuning, only the adapters are updated, not the entire LLM. This makes the process faster and requires less data compared to traditional fine-tuning.
+
+[Check the original paper for more](https://arxiv.org/pdf/2305.14314v1.pdf)
+
+## Future challenges
+
+- Memory:F.R.I.D.A.Y. is still a new project, and as such, several features seen in proeminent AI chats, such as ChatGPT or Gemini, are still missing. One prime example is the bot's "memory" of a conversation. That is the result of the integration of the LLM with a vector database in a Chain of Thought. It will, in the future, be implemented in F.R.I.D.A.Y. as well. 
+- Dataset: truthful_qa is an excellent dataset, but its too small for the purposes of F.R.I.D.A.Y. As such, a new dataset will be chosen in the future
+- Pretrained LLM: Due to physical constraints, we weren't able to train an LLM better than GPT2-large. That won't be a problem in the future, and a better LLM will be selected.
