@@ -2,18 +2,13 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-import json
 import torch
-from torch.utils.data import DataLoader, Dataset
 import pandas as pd
 from datasets import load_dataset
 from transformers import (AutoModelForCausalLM,
                           AutoTokenizer,
                           BitsAndBytesConfig,
-                          HfArgumentParser,
                           TrainingArguments,
-                          Trainer,
-                          DataCollatorWithPadding,
                           pipeline,
                           logging)
 
@@ -22,23 +17,16 @@ from trl import SFTTrainer
 
 
 model_name = 'gpt2-large'
-
-
 dataset = load_dataset('truthful_qa', 'generation')
-
-
 dataset['train'] = dataset['validation']
 del dataset['validation']
 dataset
 
-
 def concat_qa(example):
     return {"input_text": "<startofstring> " + example['question'] + " <bot>: " + example['best_answer'] + "<endofstring>"}
 
-
 aux = dataset.map(concat_qa)
 aux
-
 
 lora_r = 32
 lora_alpha = 16
@@ -85,7 +73,6 @@ model.config.pretraining_tp = 1
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-
 tokenizer.padding_side = 'right'
 tokenizer.add_special_tokens({
     'pad_token': '<pad>',
@@ -93,11 +80,8 @@ tokenizer.add_special_tokens({
     'eos_token': '<endofstring>',
 })
 tokenizer.add_tokens(['<bot>: '])
-
 tokenizer.pad_token_id = tokenizer.eos_token_id
-
 model.resize_token_embeddings(len(tokenizer))
-
 
 peft_config = LoraConfig(lora_alpha=lora_alpha,
                          lora_dropout=lora_dropout,
@@ -137,22 +121,13 @@ trainer = SFTTrainer(model=model,
                      max_seq_length=None,
                      packing=False)
 
-
 trainer.train()
 
 
 finetuned_model = trainer.model
 prompt = "<startofstring> How are you doing today? <bot>: "
 
-pipe = pipeline(task='text-generation', model=finetuned_model,
-                tokenizer=tokenizer, max_length=200)
-
-result = pipe(prompt)
-print(result[0]['generated_text'])
-
-
 finetuned_model.save_pretrained('model')
-
 
 base_model = AutoModelForCausalLM.from_pretrained(model_name,
                                                   low_cpu_mem_usage=True,
@@ -161,21 +136,7 @@ base_model = AutoModelForCausalLM.from_pretrained(model_name,
                                                   device_map="auto")
 
 base_model.resize_token_embeddings(len(tokenizer))
-
 final_model = PeftModel.from_pretrained(base_model, 'model')
-
 final_model = final_model.merge_and_unload()
-
-
-pipe = pipeline(task='text-generation', model=final_model,
-                tokenizer=tokenizer, max_length=45)
-
-result = pipe(prompt)
-print(result[0]['generated_text'])
-
-
-print(pipe("<startofstring> Are you okay? <bot>: ")[0]['generated_text'])
-
-
 final_model.save_pretrained('friday_model')
 tokenizer.save_pretrained('friday_model')
