@@ -1,4 +1,5 @@
 import os
+import time
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -17,6 +18,8 @@ from trl import SFTTrainer
 
 
 model_name = 'gpt2-large'
+
+print("Loading dataset...", flush=True)
 dataset = load_dataset('truthful_qa', 'generation')
 dataset['train'] = dataset['validation']
 del dataset['validation']
@@ -25,8 +28,13 @@ dataset
 def concat_qa(example):
     return {"input_text": "<startofstring> " + example['question'] + " <bot>: " + example['best_answer'] + "<endofstring>"}
 
+print("Preprocessing dataset...", flush=True)
 aux = dataset.map(concat_qa)
 aux
+time.sleep(1)
+print("Dataset preprocessed!", flush=True)
+time.sleep(0.2)
+print("Defining arguments...", flush=True)
 
 lora_r = 32
 lora_alpha = 16
@@ -62,7 +70,8 @@ bnb_config = BitsAndBytesConfig(load_in_4bit=use_4bit,
                                 bnb_4bit_quant_type=bnb_4bit_quant_type,
                                 bnb_4bit_compute_dtype=compute_dtype,
                                 bnb_4bit_use_double_quant=use_nested_quant)
-
+time.sleep(0.2)
+print("Creating model...", flush=True)
 model = AutoModelForCausalLM.from_pretrained(model_name,
                                              quantization_config=bnb_config,
                                              device_map="auto")
@@ -71,6 +80,7 @@ model.config.use_cache = False
 model.config.pretraining_tp = 1
 
 
+print("Creating and adjusting tokenizer...", flush=True)
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 tokenizer.padding_side = 'right'
@@ -111,7 +121,8 @@ args = TrainingArguments(output_dir=output_dir,
                          group_by_length=group_by_length,
                          lr_scheduler_type=lr_scheduler_type)
 
-
+print("Training model...", flush=True)
+time.sleep(1)
 trainer = SFTTrainer(model=model,
                      args=args,
                      train_dataset=aux['train'],
@@ -123,10 +134,8 @@ trainer = SFTTrainer(model=model,
 
 trainer.train()
 
-
+print("Model trained!", flush=True)
 finetuned_model = trainer.model
-prompt = "<startofstring> How are you doing today? <bot>: "
-
 finetuned_model.save_pretrained('model')
 
 base_model = AutoModelForCausalLM.from_pretrained(model_name,
@@ -135,8 +144,11 @@ base_model = AutoModelForCausalLM.from_pretrained(model_name,
                                                   torch_dtype=torch.float16,
                                                   device_map="auto")
 
+print("Meging and unloading...", flush=True)
 base_model.resize_token_embeddings(len(tokenizer))
 final_model = PeftModel.from_pretrained(base_model, 'model')
 final_model = final_model.merge_and_unload()
+time.sleep(1)
 final_model.save_pretrained('friday_model')
 tokenizer.save_pretrained('friday_model')
+print("Done!")
